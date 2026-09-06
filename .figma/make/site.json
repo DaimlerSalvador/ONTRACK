@@ -1,0 +1,10 @@
+{
+  "description": "Streamline collaborative projects with a task and deadline monitoring system designed for student groups, enhancing organization and communication.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
