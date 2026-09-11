@@ -804,6 +804,8 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   const [confirm, setConfirm] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [showFullTerms, setShowFullTerms] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
   const isLogin = mode === 'login'
 
   function handleSubmit() {
@@ -840,11 +842,29 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           <label style={S.label}>Email</label>
           <input style={S.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@university.edu" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
           <label style={S.label}>Password</label>
-          <input style={S.input} type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+          <div style={{ position: 'relative', marginBottom: '14px' }}>
+            <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              {showPassword ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+              )}
+            </button>
+          </div>
           {!isLogin && (
             <div>
               <label style={S.label}>Confirm Password</label>
-              <input style={S.input} type="password" value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+              <div style={{ position: 'relative' }}>
+                <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirm ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  {showConfirm ? (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                  ) : (
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+                  )}
+                </button>
+              </div>
             </div>
           )}
           {!isLogin && (
@@ -911,6 +931,9 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword }: { us
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
   const [msg, setMsg] = useState<{ text: string; ok: boolean } | null>(null)
+  const [showCurrent, setShowCurrent] = useState(false)
+  const [showNext, setShowNext] = useState(false)
+  const [showConfirmNew, setShowConfirmNew] = useState(false)
 
   function save() {
     const err = onChangePassword(current, next, confirm)
@@ -931,11 +954,38 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword }: { us
         <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: '#e0e0e0' }}>Change Password</h3>
         {msg && <div style={{ background: msg.ok ? '#163326' : '#2a1515', border: `1px solid ${msg.ok ? '#22c55e30' : '#e8404030'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: msg.ok ? '#4ade80' : '#e84040' }}>{msg.text}</div>}
         <label style={S.label}>Current Password</label>
-        <input type="password" style={S.input} value={current} onChange={e => setCurrent(e.target.value)} placeholder="••••••••" />
+        <div style={{ position: 'relative', marginBottom: '14px' }}>
+          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showCurrent ? "text" : "password"} value={current} onChange={e => setCurrent(e.target.value)} placeholder="••••••••" />
+          <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {showCurrent ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+            )}
+          </button>
+        </div>
         <label style={S.label}>New Password</label>
-        <input type="password" style={S.input} value={next} onChange={e => setNext(e.target.value)} placeholder="Min. 6 characters" />
+        <div style={{ position: 'relative', marginBottom: '14px' }}>
+          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showNext ? "text" : "password"} value={next} onChange={e => setNext(e.target.value)} placeholder="Min. 6 characters" />
+          <button type="button" onClick={() => setShowNext(!showNext)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {showNext ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+            )}
+          </button>
+        </div>
         <label style={S.label}>Confirm New Password</label>
-        <input type="password" style={S.input} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
+        <div style={{ position: 'relative' }}>
+          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirmNew ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
+          <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {showConfirmNew ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+            )}
+          </button>
+        </div>
         <button style={S.red} onClick={save}>Save Changes</button>
       </div>
       <div style={{ display: 'flex', gap: '10px' }}>
