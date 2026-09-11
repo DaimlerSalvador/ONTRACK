@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => {
   const emitSourcemaps = mode === 'development'
 
   return {
-    base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : '/ONTRACK/',
+    base: process.env.FIGMA_PUBLIC_URL ? `${process.env.FIGMA_PUBLIC_URL}/` : (mode === 'production' ? '/ONTRACK/' : '/'),
     build: {
       sourcemap: emitSourcemaps ? 'inline' : false,
       minify: !emitSourcemaps,

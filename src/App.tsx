@@ -700,10 +700,9 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
             )}
           </div>
           {currentUser && (
-            <button onClick={() => setView('profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: '#aaa', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Avatar name={currentUser.name} size={26} color="#2563eb" />
-              <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser.name}</span>
-            </button>
+             <button onClick={() => setView('profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: '#aaa', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+               <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser.name}</span>
+             </button>
           )}
         </div>
       </header>
@@ -741,8 +740,8 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
               ))
             }
             <Divider />
-            <SidebarBtn label="📦 Archived" active={view === 'archived'} onClick={() => setView('archived')} dim />
-            <SidebarBtn label="👤 Profile"  active={view === 'profile'}  onClick={() => setView('profile')}  dim />
+            <SidebarBtn label="Archived" active={view === 'archived'} onClick={() => setView('archived')} dim />
+            <SidebarBtn label="Profile"  active={view === 'profile'}  onClick={() => setView('profile')}  dim />
           </div>
         </aside>
 
