@@ -279,7 +279,10 @@ export default function App() {
     const layout = computeFlowchartLayout(allTasks, taskDepsMap)
     allTasks.forEach(t => {
       const pos = layout[t.id]
-      if (pos) taskDB.update(t.id, { x: pos.x, y: pos.y })
+      if (pos) {
+        const updated = taskDB.update(t.id, { x: pos.x, y: pos.y })
+        if (updated) writeRow('tasks', updated)
+      }
     })
     loadRoomData()
   }
@@ -291,7 +294,7 @@ export default function App() {
     writeRow('tasks', task)
     syncTable('task_deps')
     setMCreateTask(false)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -300,8 +303,9 @@ export default function App() {
     taskDB.setDeps(id, deps)
     const updated = taskDB.forRoom(currentRoomId ?? '')
     updated.filter(t => t.id === id).forEach(t => writeRow('tasks', t))
+    syncTable('task_deps')
     setEditingTask(null)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -311,7 +315,7 @@ export default function App() {
     const updated = taskDB.forRoom(currentRoom.id).find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -320,7 +324,7 @@ export default function App() {
     const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -331,7 +335,7 @@ export default function App() {
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -342,7 +346,7 @@ export default function App() {
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -351,7 +355,7 @@ export default function App() {
     deleteRow('tasks', taskId)
     syncTable('task_deps')
     setMTaskDetail(null)
-    loadRoomData()
+    autoArrange()
   }
 
   // ── Chat ──
@@ -1352,15 +1356,8 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       x = task.x
       y = task.y
     } else {
-      const nodeH = 50
-      const vGap = 40
-      const hGap = 170
-      // Find the lowest y position among existing tasks and place below
-      const maxY = existingTasks.reduce((max, t) => Math.max(max, t.y + nodeH), 60)
-      // Stagger x positions to avoid vertical-only stacking
-      const count = existingTasks.filter(t => t.x < 400).length
-      x = 100 + (count % 3) * hGap
-      y = maxY > 60 ? maxY + vGap : 60
+      x = 100
+      y = 60
     }
     const data = {
       roomId,
