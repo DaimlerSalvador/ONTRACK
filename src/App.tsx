@@ -290,7 +290,7 @@ export default function App() {
     writeRow('tasks', task)
     syncTable('task_deps')
     setMCreateTask(false)
-    autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -1353,9 +1353,13 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
     } else {
       const nodeH = 50
       const vGap = 40
-      const minY = existingTasks.reduce((max, t) => Math.max(max, t.y + nodeH), 60)
-      x = 100
-      y = minY > 60 ? minY + vGap : 60
+      const hGap = 170
+      // Find the lowest y position among existing tasks and place below
+      const maxY = existingTasks.reduce((max, t) => Math.max(max, t.y + nodeH), 60)
+      // Stagger x positions to avoid vertical-only stacking
+      const count = existingTasks.filter(t => t.x < 400).length
+      x = 100 + (count % 3) * hGap
+      y = maxY > 60 ? maxY + vGap : 60
     }
     const data = {
       roomId,
