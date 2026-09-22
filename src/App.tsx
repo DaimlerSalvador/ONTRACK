@@ -1342,6 +1342,17 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
     if (!title.trim()) return
     validateDeadline(deadline)
     if (deadlineError) return
+    let x: number, y: number
+    if (task) {
+      x = task.x
+      y = task.y
+    } else {
+      const nodeH = 50
+      const vGap = 40
+      const minY = existingTasks.reduce((max, t) => Math.max(max, t.y + nodeH), 60)
+      x = 100
+      y = minY > 60 ? minY + vGap : 60
+    }
     const data = {
       roomId,
       title: title.trim(),
@@ -1349,8 +1360,8 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       assigneeIds,
       deadline,
       status: task?.status ?? 'not-started',
-      x: task?.x ?? 100,
-      y: task?.y ?? 60,
+      x,
+      y,
     }
     onSave(data, deps)
   }

@@ -192,7 +192,7 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
           rows.push({ id: doc.id, ...doc.data() })
         })
 
-        // room_members needs special merge logic (composite key)
+        // room_members and task_deps need special merge logic (composite keys)
         if (colName === 'room_members') {
           const local = lsGet<any>('members')
           const byId = new Map(local.map((m) => [`${m.roomId}:${m.userId}`, m]))
@@ -201,6 +201,14 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
             byId.set(key, row)
           }
           lsSet('members', Array.from(byId.values()))
+        } else if (colName === 'task_deps') {
+          const local = lsGet<any>('task_deps')
+          const byId = new Map(local.map((d) => [`${d.taskId}:${d.dependsOnId}`, d]))
+          for (const row of rows) {
+            const key = `${row.taskId}:${row.dependsOnId}`
+            byId.set(key, row)
+          }
+          lsSet('task_deps', Array.from(byId.values()))
         } else {
           // For regular tables, Firestore doc.id matches row.id
           lsMerge(lsKey, rows)
