@@ -5,6 +5,8 @@ import {
   type User, type Room, type RoomMember, type Task, type Message,
   type Notification, type TaskStatus, type Role,
 } from './database'
+import { waitForFirebase } from './firebase'
+import { initFirebaseSync, writeRow, deleteRow, syncTable } from './firebase-db'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -76,8 +78,26 @@ export default function App() {
     migrateDB()
     initDB()
     userDB.logout()
+    // Initialize Firebase sync (degrades gracefully if unavailable)
+    waitForFirebase(3000).then((ok) => {
+      if (ok) {
+        initFirebaseSync()
+      }
+    })
     setReady(true)
   }, [])
+
+  // ── Listen for Firestore-driven localStorage updates ──
+
+  useEffect(() => {
+    const handler = () => {
+      loadRooms()
+      if (currentRoomId) loadRoomData()
+      if (currentUser) loadNotifs()
+    }
+    window.addEventListener('ontrack:sync', handler)
+    return () => window.removeEventListener('ontrack:sync', handler)
+  }, [currentRoomId, currentUser])
 
   // ── Load rooms whenever user changes or view goes to home ──
 
@@ -131,6 +151,7 @@ export default function App() {
   function handleRegister(name: string, email: string, password: string) {
     const result = userDB.register(name, email, password)
     if (typeof result === 'string') { setAuthError(result); return }
+    writeRow('users', result)
     setCurrentUser(result)
     setRooms([])
     setCurrentRoomId(null)
@@ -179,6 +200,8 @@ export default function App() {
   function createRoom(title: string, description: string, color: string) {
     if (!currentUser) return
     const room = roomDB.insert({ title, description, leaderId: currentUser.id, color })
+    writeRow('rooms', room)
+    writeRow('room_members', { roomId: room.id, userId: currentUser.id, role: 'leader', joinedAt: now() })
     setMCreateRoom(false)
     loadRooms()
     goRoom(room.id)
@@ -189,6 +212,8 @@ export default function App() {
     const normalizedCode = code.trim().toUpperCase()
     const result = roomDB.join(normalizedCode, currentUser.id)
     if (typeof result === 'string') { alert(result); return }
+    const member = memberDB.find(result.id, currentUser.id)
+    if (member) writeRow('room_members', member)
     setMJoinRoom(false)
     loadRooms()
     goRoom(result.id)
@@ -196,6 +221,7 @@ export default function App() {
 
   function archiveRoom(id: string) {
     roomDB.update(id, { archived: true })
+    if (roomDB.find(id)) writeRow('rooms', roomDB.find(id)!)
     loadRooms()
     setView('home')
     setCurrentRoomId(null)
@@ -203,11 +229,13 @@ export default function App() {
 
   function unarchiveRoom(id: string) {
     roomDB.update(id, { archived: false })
+    if (roomDB.find(id)) writeRow('rooms', roomDB.find(id)!)
     loadRooms()
   }
 
   function deleteRoom(id: string) {
     roomDB.delete(id)
+    deleteRow('rooms', id)
     loadRooms()
     setView('home')
     setCurrentRoomId(null)
@@ -216,12 +244,15 @@ export default function App() {
 
   function updateRoom(id: string, data: { title?: string; description?: string }) {
     roomDB.update(id, data)
+    const updated = roomDB.find(id)
+    if (updated) writeRow('rooms', updated)
     loadRooms()
   }
 
   function leaveRoom(roomId: string) {
     if (!currentUser) return
     memberDB.delete(roomId, currentUser.id)
+    deleteRow('room_members', `${roomId}:${currentUser.id}`)
     loadRooms()
     setView('home')
     setCurrentRoomId(null)
@@ -229,10 +260,12 @@ export default function App() {
 
   function removeMember(roomId: string, userId: string) {
     memberDB.delete(roomId, userId)
+    deleteRow('room_members', `${roomId}:${userId}`)
     const tasks = taskDB.forRoom(roomId)
     tasks.forEach(task => {
       if (task.assigneeIds.includes(userId)) {
-        taskDB.update(task.id, { assigneeIds: task.assigneeIds.filter(id => id !== userId) })
+        const updated = taskDB.update(task.id, { assigneeIds: task.assigneeIds.filter(id => id !== userId) })
+        if (updated) writeRow('tasks', updated)
       }
     })
     loadRoomData()
@@ -253,7 +286,9 @@ export default function App() {
   // ── Task actions ──
 
   function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
-    taskDB.insert(data, deps)
+    const task = taskDB.insert(data, deps)
+    writeRow('tasks', task)
+    deps.forEach(depId => writeRow('task_deps', { taskId: task.id, dependsOnId: depId }))
     setMCreateTask(false)
     loadRoomData()
     loadNotifs()
@@ -262,6 +297,8 @@ export default function App() {
   function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     taskDB.update(id, data)
     taskDB.setDeps(id, deps)
+    const updated = taskDB.forRoom(currentRoomId ?? '')
+    updated.filter(t => t.id === id).forEach(t => writeRow('tasks', t))
     setEditingTask(null)
     loadRoomData()
     loadNotifs()
@@ -270,6 +307,8 @@ export default function App() {
   function submitTask(taskId: string, link: string) {
     if (!currentRoom) return
     taskDB.submit(taskId, link, currentRoom.leaderId)
+    const updated = taskDB.forRoom(currentRoom.id).find(t => t.id === taskId)
+    if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
     loadRoomData()
     loadNotifs()
@@ -277,6 +316,8 @@ export default function App() {
 
   function startTask(taskId: string) {
     taskDB.update(taskId, { status: 'in-progress' })
+    const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === taskId)
+    if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     loadRoomData()
     loadNotifs()
@@ -286,6 +327,8 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.approve(taskId, task.assigneeIds)
+    const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
+    if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     loadRoomData()
     loadNotifs()
@@ -295,6 +338,8 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.requestRevision(taskId, task.assigneeIds)
+    const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
+    if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     loadRoomData()
     loadNotifs()
@@ -302,6 +347,8 @@ export default function App() {
 
   function deleteTask(taskId: string) {
     taskDB.delete(taskId)
+    deleteRow('tasks', taskId)
+    syncTable('task_deps')
     setMTaskDetail(null)
     loadRoomData()
   }
@@ -310,7 +357,8 @@ export default function App() {
 
   function sendMessage() {
     if (!chatInput.trim() || !currentRoomId || !currentUser) return
-    messageDB.insert(currentRoomId, currentUser.id, chatInput)
+    const msg = messageDB.insert(currentRoomId, currentUser.id, chatInput)
+    writeRow('messages', msg)
     setChatInput('')
     setMessages(messageDB.forRoom(currentRoomId))
   }
@@ -322,7 +370,8 @@ export default function App() {
     if (currentUser.password !== current) return 'Current password is incorrect.'
     if (next.length < 6) return 'New password must be at least 6 characters.'
     if (next !== confirm) return 'Passwords do not match.'
-    userDB.update(currentUser.id, { password: next })
+    const updated = userDB.update(currentUser.id, { password: next })
+    if (updated) writeRow('users', updated)
     return null
   }
 
@@ -330,7 +379,11 @@ export default function App() {
 
   function openNotifs() {
     setShowNotifs(v => !v)
-    if (currentUser) { notifDB.markAllRead(currentUser.id); loadNotifs() }
+    if (currentUser) {
+      notifDB.markAllRead(currentUser.id)
+      notifDB.forUser(currentUser.id).forEach(n => { if (n.read) writeRow('notifications', n) })
+      loadNotifs()
+    }
   }
 
   if (!ready) return null
