@@ -288,9 +288,9 @@ export default function App() {
   function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     const task = taskDB.insert(data, deps)
     writeRow('tasks', task)
-    deps.forEach(depId => writeRow('task_deps', { taskId: task.id, dependsOnId: depId }))
+    syncTable('task_deps')
     setMCreateTask(false)
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -1138,7 +1138,7 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
     } else {
       const items = group.map(t => {
         const parentIds = deps[t.id]
-        if (parentIds.length === 0) return { id: t.id, idealX: 0 }
+        if (parentIds.length === 0) return { id: t.id, idealX: startX }
         const parentXs = parentIds.map(pid => positions.get(pid)!.x + nodeW / 2)
         const avgX = parentXs.reduce((sum, x) => sum + x, 0) / parentXs.length
         return { id: t.id, idealX: avgX - nodeW / 2 }
@@ -1146,7 +1146,11 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
 
       items.sort((a, b) => a.idealX - b.idealX)
 
-      let currentX = items[0].idealX
+      // Center the group under the average parent center
+      const groupWidth = group.length * nodeW + (group.length - 1) * hGap
+      const groupCenterX = items.reduce((sum, item) => sum + item.idealX + nodeW / 2, 0) / group.length
+      let currentX = Math.max(startX, groupCenterX - groupWidth / 2)
+
       items.forEach((item, i) => {
         if (i > 0) {
           const prevX = positions.get(items[i - 1].id)!.x
