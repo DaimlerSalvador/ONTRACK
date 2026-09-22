@@ -116,7 +116,8 @@ export default function App() {
     setMessages(messageDB.forRoom(currentRoomId))
     const rawMembers = memberDB.forRoom(currentRoomId)
     setMembers(rawMembers.map(m => ({ ...m, user: userDB.find(m.userId)! })).filter(m => m.user))
-    taskDB.checkLate(currentRoomId)
+    const lateTasks = taskDB.checkLate(currentRoomId)
+    lateTasks.forEach(t => writeRow('tasks', t))
   }, [currentRoomId])
 
   useEffect(() => { loadRoomData() }, [loadRoomData])

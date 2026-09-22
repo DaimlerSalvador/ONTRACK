@@ -37,7 +37,22 @@ function lsSet<T>(table: string, rows: T[]): void {
 function lsMerge<T extends { id: string }>(table: string, rows: T[]): void {
   const existing = new Map(lsGet<T>(table).map((r) => [r.id, r]))
   for (const row of rows) {
-    if (row.id) existing.set(row.id, row)
+    if (row.id) {
+      const existingRow = existing.get(row.id)
+      if (existingRow) {
+        const merged = { ...existingRow, ...row }
+        // Preserve positions if Firestore data has zeroes but local has real values
+        if (table === 'tasks') {
+          const er = existingRow as any
+          const rr = row as any
+          if (rr.x === 0 && er.x > 0) (merged as any).x = er.x
+          if (rr.y === 0 && er.y > 0) (merged as any).y = er.y
+        }
+        existing.set(row.id, merged)
+      } else {
+        existing.set(row.id, row)
+      }
+    }
   }
   lsSet(table, Array.from(existing.values()))
 }

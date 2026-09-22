@@ -452,16 +452,19 @@ export const taskDB = {
     save('task_deps', rows)
   },
 
-  /** Mark overdue tasks as late and notify assignees */
-  checkLate(roomId: string): void {
+  /** Mark overdue tasks as late and notify assignees. Returns updated tasks. */
+  checkLate(roomId: string): Task[] {
     const tasks = select<Task>('tasks').filter(t => t.roomId === roomId)
     const now = Date.now()
+    const updated: Task[] = []
     tasks.forEach(task => {
       if ((task.status === 'not-started' || task.status === 'in-progress' || task.status === 'revision') && new Date(task.deadline).getTime() < now) {
-        taskDB.update(task.id, { status: 'late' })
+        const t = taskDB.update(task.id, { status: 'late' })
+        if (t) updated.push(t)
         task.assigneeIds.forEach(aid => notifDB.insert(aid, `Task "${task.title}" is late. Deadline was ${task.deadline}.`))
       }
     })
+    return updated
   },
 
   /** Submit task — updates status and notifies leader */
