@@ -7,6 +7,7 @@ import {
 } from './database'
 import { waitForFirebase } from './firebase'
 import { initFirebaseSync, writeRow, deleteRow, syncTable } from './firebase-db'
+import { applyTheme, stopThemeObserver, type Theme } from './theme'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -59,7 +60,10 @@ export default function App() {
   const [showNotifs, setShowNotifs] = useState(false)
   const [showRoomMenu, setShowRoomMenu] = useState(false)
   const [authError, setAuthError] = useState('')
-  const [theme, setTheme] = useState<'light' | 'dark'>(() => localStorage.getItem('ontrack_theme') as 'light' | 'dark' ?? 'dark')
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof localStorage === 'undefined') return 'dark'
+    return (localStorage.getItem('ontrack_theme') as Theme) ?? 'dark'
+  })
 
   // Modals
   const [mCreateRoom, setMCreateRoom] = useState(false)
@@ -91,8 +95,8 @@ export default function App() {
   // ── Theme ──
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme)
-    localStorage.setItem('ontrack_theme', theme)
+    stopThemeObserver()
+    applyTheme(theme)
   }, [theme])
 
   // ── Listen for Firestore-driven localStorage updates ──
@@ -828,34 +832,34 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
 
 function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister: () => void }) {
   return (
-    <div style={{ minHeight: '100vh', background: '#0a0a0a', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
-        <ellipse cx="25%" cy="55%" rx="48%" ry="38%" fill="none" stroke="#1c1c1c" strokeWidth="1.5" transform="rotate(-12,400,400)" />
-        <ellipse cx="72%" cy="35%" rx="38%" ry="30%" fill="none" stroke="#1a1a1a" strokeWidth="1" transform="rotate(8,700,300)" />
-        <ellipse cx="55%" cy="75%" rx="55%" ry="22%" fill="none" stroke="#181818" strokeWidth="1" transform="rotate(-3,600,500)" />
-        <ellipse cx="80%" cy="62%" rx="28%" ry="42%" fill="none" stroke="#191919" strokeWidth="1.5" transform="rotate(18,800,500)" />
-        <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="#181818" strokeWidth="1" transform="rotate(-25,200,200)" />
+        <ellipse cx="25%" cy="55%" rx="48%" ry="38%" fill="none" stroke="var(--surface-elevated)" strokeWidth="1.5" transform="rotate(-12,400,400)" />
+        <ellipse cx="72%" cy="35%" rx="38%" ry="30%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(8,700,300)" />
+        <ellipse cx="55%" cy="75%" rx="55%" ry="22%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-3,600,500)" />
+        <ellipse cx="80%" cy="62%" rx="28%" ry="42%" fill="none" stroke="var(--surface-elevated)" strokeWidth="1.5" transform="rotate(18,800,500)" />
+        <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-25,200,200)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid #171717' }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: '#f0f0f0' }}>ONTRACK</span>
+      <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--border)' }}>
+        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--text)' }}>ONTRACK</span>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button onClick={onLogin} style={{ background: 'none', border: 'none', color: '#888', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
+          <button onClick={onLogin} style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '13px' }}>Register Now</button>
         </div>
       </nav>
       <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 58px)', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ fontSize: '11px', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: '#444', marginBottom: '24px' }}>STUDENT PROJECT MANAGEMENT</div>
-        <h1 style={{ fontSize: 'clamp(36px, 7vw, 72px)', fontWeight: 800, color: '#f0f0f0', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: '22px' }}>
-          WELCOME TO <span style={{ color: '#e84040' }}>ONTRACK</span>
+        <div style={{ fontSize: '11px', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '24px' }}>STUDENT PROJECT MANAGEMENT</div>
+        <h1 style={{ fontSize: 'clamp(36px, 7vw, 72px)', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: '22px' }}>
+          WELCOME TO <span style={{ color: 'var(--accent)' }}>ONTRACK</span>
         </h1>
-        <p style={{ fontSize: '16px', color: '#666', maxWidth: '380px', lineHeight: 1.7, marginBottom: '40px' }}>Track tasks. Visualize progress. Hit every deadline.</p>
+        <p style={{ fontSize: '16px', color: 'var(--text-secondary)', maxWidth: '380px', lineHeight: 1.7, marginBottom: '40px' }}>Track tasks. Visualize progress. Hit every deadline.</p>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '15px', padding: '13px 36px' }}>Get Started</button>
           <button onClick={onLogin} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>Log in</button>
         </div>
-        <div style={{ marginTop: '70px', display: 'flex', gap: '40px', color: '#444', fontSize: '13px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ marginTop: '70px', display: 'flex', gap: '40px', color: 'var(--text-muted)', fontSize: '13px', flexWrap: 'wrap', justifyContent: 'center' }}>
           {['Flowchart Visualization','Role-Based Access','Real-Time Tracking','Group Chat'].map(f => (
-            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: '#e84040' }}>✓</span>{f}</span>
+            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: 'var(--accent)' }}>✓</span>{f}</span>
           ))}
         </div>
       </div>
