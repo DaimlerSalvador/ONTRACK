@@ -1,9 +1,9 @@
 /**
  * Theme utilities for OnTrack.
  *
- * Uses a MutationObserver to walk the DOM and patch inline styles
- * directly, which is more reliable than CSS selectors for overriding
- * React-set inline styles.
+ * Uses a MutationObserver plus a polling fallback to walk the DOM and
+ * patch inline styles directly, which is more reliable than CSS
+ * selectors for overriding React-set inline styles.
  */
 
 export type Theme = 'light' | 'dark'
@@ -71,25 +71,30 @@ function patchStyle(style: string, mapping: Record<string, string>): string {
   return result
 }
 
-function walkAndPatch(node: Node, mapping: Record<string, string>): void {
-  if (node.nodeType === Node.ELEMENT_NODE) {
-    const el = node as HTMLElement
-    // Skip auth pages - keep them dark
-    if (el.hasAttribute('data-auth')) {
-      for (const child of node.childNodes) {
-        walkAndPatch(child, mapping)
-      }
-      return
-    }
-    const style = el.getAttribute('style')
-    if (style && !el.getAttribute('data-theme-patched')) {
-      const patched = patchStyle(style, mapping)
-      if (patched !== style) {
-        el.setAttribute('style', patched)
-        el.setAttribute('data-theme-patched', 'true')
-      }
+function isAuthElement(el: HTMLElement): boolean {
+  let current: HTMLElement | null = el
+  while (current && current !== document.body) {
+    if (current.hasAttribute('data-auth')) return true
+    current = current.parentElement
+  }
+  return false
+}
+
+function patchElement(el: HTMLElement, mapping: Record<string, string>): void {
+  if (isAuthElement(el)) return
+  const style = el.getAttribute('style')
+  if (style) {
+    const patched = patchStyle(style, mapping)
+    if (patched !== style) {
+      el.setAttribute('style', patched)
     }
   }
+}
+
+function walkAndPatch(node: Node, mapping: Record<string, string>): void {
+  if (node.nodeType !== Node.ELEMENT_NODE) return
+  const el = node as HTMLElement
+  patchElement(el, mapping)
   for (const child of node.childNodes) {
     walkAndPatch(child, mapping)
   }
@@ -100,10 +105,6 @@ export function applyTheme(target: Theme): void {
   html.setAttribute('data-theme', target)
   localStorage.setItem('ontrack_theme', target)
 
-  // Remove old patched markers and observer
-  document.querySelectorAll('[data-theme-patched]').forEach(el => {
-    el.removeAttribute('data-theme-patched')
-  })
   stopThemeObserver()
 
   const mapping = target === 'light' ? DARK_TO_LIGHT : LIGHT_TO_DARK
@@ -111,12 +112,35 @@ export function applyTheme(target: Theme): void {
   // Initial patch
   walkAndPatch(html, mapping)
 
-  // Re-patch after React re-renders
-  const observer = new MutationObserver(() => {
-    walkAndPatch(html, mapping)
+  // Re-patch after React re-renders via MutationObserver
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.type === 'childList') {
+        mutation.addedNodes.forEach((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            walkAndPatch(node, mapping)
+          }
+        })
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+        patchElement(mutation.target as HTMLElement, mapping)
+      }
+    }
   })
   observer.observe(html, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
   ;(html as any)._themeObserver = observer
+
+  // Polling fallback for the first 2 seconds after theme change
+  // This catches any React re-renders that the MutationObserver misses
+  let pollCount = 0
+  const maxPolls = 10
+  const pollInterval = setInterval(() => {
+    pollCount++
+    walkAndPatch(html, mapping)
+    if (pollCount >= maxPolls) {
+      clearInterval(pollInterval)
+    }
+  }, 200)
+  ;(html as any)._themePollInterval = pollInterval
 }
 
 export function stopThemeObserver(): void {
@@ -126,7 +150,9 @@ export function stopThemeObserver(): void {
     observer.disconnect()
     ;(html as any)._themeObserver = null
   }
-  document.querySelectorAll('[data-theme-patched]').forEach(el => {
-    el.removeAttribute('data-theme-patched')
-  })
+  const pollInterval = (html as any)._themePollInterval
+  if (pollInterval) {
+    clearInterval(pollInterval)
+    ;(html as any)._themePollInterval = null
+  }
 }
