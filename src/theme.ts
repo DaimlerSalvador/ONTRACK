@@ -1,8 +1,9 @@
 /**
  * Theme utilities for OnTrack.
  *
- * Uses a dynamic <style> element with !important rules to override
- * inline styles reliably across all pages.
+ * Uses a MutationObserver to walk the DOM and patch inline styles
+ * directly, which is more reliable than CSS selectors for overriding
+ * React-set inline styles.
  */
 
 export type Theme = 'light' | 'dark'
@@ -17,152 +18,115 @@ export function getStoredTheme(): Theme {
   return (localStorage.getItem('ontrack_theme') as Theme) ?? 'light'
 }
 
+const DARK_TO_LIGHT: Record<string, string> = {
+  '#111111': '#f4f4f5',
+  '#111': '#f4f4f5',
+  '#0a0a0a': '#f4f4f5',
+  '#0d0d0d': '#ffffff',
+  '#131313': '#ffffff',
+  '#161616': '#ffffff',
+  '#171717': '#ffffff',
+  '#181818': '#ffffff',
+  '#191919': '#ffffff',
+  '#1a1a1a': '#ffffff',
+  '#1c1c1c': '#ffffff',
+  '#222222': '#f9fafb',
+  '#222': '#f9fafb',
+  '#252525': '#f9fafb',
+  '#2a2a2a': '#f9fafb',
+  '#333333': '#f9fafb',
+  '#333': '#f9fafb',
+  '#e0e0e0': '#e4e4e7',
+  '#e4e4e4': '#e4e4e7',
+  '#f0f0f0': '#18181b',
+  '#f5f5f5': '#18181b',
+  '#ffffff': '#18181b',
+  '#fff': '#18181b',
+  '#aaa': '#71717a',
+  '#aaaaaa': '#71717a',
+  '#ccc': '#71717a',
+  '#777': '#71717a',
+  '#888': '#71717a',
+  '#666666': '#71717a',
+  '#666': '#71717a',
+  '#555': '#71717a',
+  '#444': '#71717a',
+  '#0e0e0e': '#ffffff',
+  '#f2f2f2': '#f4f4f5',
+}
+
+const LIGHT_TO_DARK: Record<string, string> = Object.fromEntries(
+  Object.entries(DARK_TO_LIGHT).map(([k, v]) => [v, k])
+) as Record<string, string>
+
+function patchStyle(style: string, mapping: Record<string, string>): string {
+  let result = style
+  for (const [from, to] of Object.entries(mapping)) {
+    const escaped = from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const regex = new RegExp(escaped, 'g')
+    if (regex.test(result)) {
+      result = result.replace(regex, to)
+    }
+  }
+  return result
+}
+
+function walkAndPatch(node: Node, mapping: Record<string, string>): void {
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    const el = node as HTMLElement
+    // Skip auth pages - keep them dark
+    if (el.hasAttribute('data-auth')) {
+      for (const child of node.childNodes) {
+        walkAndPatch(child, mapping)
+      }
+      return
+    }
+    const style = el.getAttribute('style')
+    if (style && !el.getAttribute('data-theme-patched')) {
+      const patched = patchStyle(style, mapping)
+      if (patched !== style) {
+        el.setAttribute('style', patched)
+        el.setAttribute('data-theme-patched', 'true')
+      }
+    }
+  }
+  for (const child of node.childNodes) {
+    walkAndPatch(child, mapping)
+  }
+}
+
 export function applyTheme(target: Theme): void {
   const html = document.documentElement
   html.setAttribute('data-theme', target)
   localStorage.setItem('ontrack_theme', target)
 
-  // Remove existing theme override style if present
-  const existing = document.getElementById('theme-overrides')
-  if (existing) existing.remove()
+  // Remove old patched markers and observer
+  document.querySelectorAll('[data-theme-patched]').forEach(el => {
+    el.removeAttribute('data-theme-patched')
+  })
+  stopThemeObserver()
 
-  const style = document.createElement('style')
-  style.id = 'theme-overrides'
+  const mapping = target === 'light' ? DARK_TO_LIGHT : LIGHT_TO_DARK
 
-  if (target === 'light') {
-    style.textContent = `
-      /* Base colors */
-      [data-theme="light"] body {
-        background: #f4f4f5 !important;
-        color: #18181b !important;
-      }
+  // Initial patch
+  walkAndPatch(html, mapping)
 
-      /* Background overrides - all dark backgrounds become light */
-      [data-theme="light"] [style*="background: #111"],
-      [data-theme="light"] [style*="background:#111"],
-      [data-theme="light"] [style*="background: #0a0a0a"],
-      [data-theme="light"] [style*="background:#0a0a0a"],
-      [data-theme="light"] [style*="background: #0d0d0d"],
-      [data-theme="light"] [style*="background:#0d0d0d"],
-      [data-theme="light"] [style*="background: #131313"],
-      [data-theme="light"] [style*="background:#131313"],
-      [data-theme="light"] [style*="background: #161616"],
-      [data-theme="light"] [style*="background:#161616"],
-      [data-theme="light"] [style*="background: #171717"],
-      [data-theme="light"] [style*="background:#171717"],
-      [data-theme="light"] [style*="background: #181818"],
-      [data-theme="light"] [style*="background:#181818"],
-      [data-theme="light"] [style*="background: #1c1c1c"],
-      [data-theme="light"] [style*="background:#1c1c1c"],
-      [data-theme="light"] [style*="background: #1a1a1a"],
-      [data-theme="light"] [style*="background:#1a1a1a"],
-      [data-theme="light"] [style*="background: #191919"],
-      [data-theme="light"] [style*="background:#191919"],
-      [data-theme="light"] [style*="background: #222"],
-      [data-theme="light"] [style*="background:#222"] {
-        background: #ffffff !important;
-      }
-
-      [data-theme="light"] [style*="background: #252525"],
-      [data-theme="light"] [style*="background:#252525"],
-      [data-theme="light"] [style*="background: #2a2a2a"],
-      [data-theme="light"] [style*="background:#2a2a2a"],
-      [data-theme="light"] [style*="background: #333"],
-      [data-theme="light"] [style*="background:#333"] {
-        background: #f9fafb !important;
-      }
-
-      [data-theme="light"] [style*="background: #0e0e0e"],
-      [data-theme="light"] [style*="background:#0e0e0e"] {
-        background: #ffffff !important;
-      }
-
-      [data-theme="light"] [style*="background: #f2f2f2"],
-      [data-theme="light"] [style*="background:#f2f2f2"] {
-        background: #f4f4f5 !important;
-      }
-
-      /* Border overrides */
-      [data-theme="light"] [style*="border: 1px solid #1e1e1e"],
-      [data-theme="light"] [style*="border:1px solid #1e1e1e"],
-      [data-theme="light"] [style*="border: 1px solid #252525"],
-      [data-theme="light"] [style*="border:1px solid #252525"],
-      [data-theme="light"] [style*="border: 1px solid #2a2a2a"],
-      [data-theme="light"] [style*="border:1px solid #2a2a2a"],
-      [data-theme="light"] [style*="border: 1px solid #333"],
-      [data-theme="light"] [style*="border:1px solid #333"] {
-        border-color: #e4e4e7 !important;
-      }
-
-      [data-theme="light"] [style*="borderBottom: 1px solid #1e1e1e"],
-      [data-theme="light"] [style*="border-bottom: 1px solid #1e1e1e"],
-      [data-theme="light"] [style*="borderBottom: 1px solid #171717"],
-      [data-theme="light"] [style*="border-bottom: 1px solid #171717"],
-      [data-theme="light"] [style*="borderRight: 1px solid #e0e0e0"],
-      [data-theme="light"] [style*="border-right: 1px solid #e0e0e0"] {
-        border-color: #e4e4e7 !important;
-      }
-
-      /* Text color overrides - light text becomes dark */
-      [data-theme="light"] [style*="color: #f0f0f0"],
-      [data-theme="light"] [style*="color:#f0f0f0"],
-      [data-theme="light"] [style*="color: #f5f5f5"],
-      [data-theme="light"] [style*="color:#f5f5f5"],
-      [data-theme="light"] [style*="color: #ffffff"],
-      [data-theme="light"] [style*="color:#ffffff"] {
-        color: #18181b !important;
-      }
-
-      /* Secondary text colors */
-      [data-theme="light"] [style*="color: #666"],
-      [data-theme="light"] [style*="color:#666"],
-      [data-theme="light"] [style*="color: #555"],
-      [data-theme="light"] [style*="color:#555"],
-      [data-theme="light"] [style*="color: #444"],
-      [data-theme="light"] [style*="color:#444"],
-      [data-theme="light"] [style*="color: #aaa"],
-      [data-theme="light"] [style*="color:#aaa"],
-      [data-theme="light"] [style*="color: #ccc"],
-      [data-theme="light"] [style*="color:#ccc"],
-      [data-theme="light"] [style*="color: #777"],
-      [data-theme="light"] [style*="color:#777"],
-      [data-theme="light"] [style*="color: #888"],
-      [data-theme="light"] [style*="color:#888"] {
-        color: #71717a !important;
-      }
-
-      /* Scrollbar */
-      [data-theme="light"] ::-webkit-scrollbar-thumb {
-        background: #d4d4d8 !important;
-      }
-      [data-theme="light"] ::-webkit-scrollbar-thumb:hover {
-        background: #a1a1aa !important;
-      }
-
-      /* SVG strokes in landing page */
-      [data-theme="light"] svg ellipse {
-        stroke: #d4d4d8 !important;
-      }
-    `
-  } else {
-    style.textContent = `
-      [data-theme="dark"] body {
-        background: #111111 !important;
-        color: #f0f0f0 !important;
-      }
-      [data-theme="dark"] ::-webkit-scrollbar-thumb {
-        background: #2a2a2a !important;
-      }
-      [data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
-        background: #3a3a3a !important;
-      }
-    `
-  }
-
-  document.head.appendChild(style)
+  // Re-patch after React re-renders
+  const observer = new MutationObserver(() => {
+    walkAndPatch(html, mapping)
+  })
+  observer.observe(html, { childList: true, subtree: true, attributes: true, attributeFilter: ['style'] })
+  ;(html as any)._themeObserver = observer
 }
 
 export function stopThemeObserver(): void {
-  const existing = document.getElementById('theme-overrides')
-  if (existing) existing.remove()
+  const html = document.documentElement
+  const observer = (html as any)._themeObserver
+  if (observer) {
+    observer.disconnect()
+    ;(html as any)._themeObserver = null
+  }
+  document.querySelectorAll('[data-theme-patched]').forEach(el => {
+    el.removeAttribute('data-theme-patched')
+  })
 }

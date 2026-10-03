@@ -894,19 +894,19 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div data-auth="true" style={{ minHeight: '100vh', background: '#0a0a0a', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.5 }} preserveAspectRatio="none">
-        <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="var(--border)" strokeWidth="1.5" transform="rotate(-10,400,450)" />
-        <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(12,700,250)" />
+        <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="#1e1e1e" strokeWidth="1.5" transform="rotate(-10,400,450)" />
+        <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="#191919" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--border)' }}>
-        <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
+      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid #171717' }}>
+        <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: '#f0f0f0', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '380px' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: 'var(--text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
-          <p style={{ fontSize: '13px', color: 'var(--text-muted)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
-          {error && <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#dc2626' }}>{error}</div>}
+        <div style={{ background: '#131313', border: '1px solid #222', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '380px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: '#f0f0f0' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
+          <p style={{ fontSize: '13px', color: '#555', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
+          {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#e84040' }}>{error}</div>}
           {!isLogin && (
             <div>
               <label style={S.label}>Full Name</label>
@@ -918,7 +918,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           <label style={S.label}>Password</label>
           <div style={{ position: 'relative', marginBottom: '14px' }}>
             <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {showPassword ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               ) : (
@@ -931,7 +931,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               <label style={S.label}>Confirm Password</label>
               <div style={{ position: 'relative' }}>
                 <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirm ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {showConfirm ? (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   ) : (
