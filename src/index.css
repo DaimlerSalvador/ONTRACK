@@ -2,65 +2,23 @@
 @import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;0,700;1,400&display=swap');
 @import 'tailwindcss';
 
-:root {
-  --bg: #f4f4f5;
-  --surface: #ffffff;
-  --surface-elevated: #f9fafb;
-  --border: #e4e4e7;
-  --border-light: #d4d4d8;
-  --text: #18181b;
-  --text-secondary: #71717a;
-  --text-muted: #a1a1aa;
-  --accent: #e84040;
-  --accent-hover: #dc2626;
-  --success: #16a34a;
-  --warning: #d97706;
-  --info: #2563eb;
-  --danger: #dc2626;
-  --input-bg: #ffffff;
-  --scrollbar-thumb: #d4d4d8;
-  --scrollbar-thumb-hover: #a1a1aa;
-  --shadow: rgba(0, 0, 0, 0.1);
-}
-
-[data-theme="dark"] {
-  --bg: #111111;
-  --surface: #1a1a1a;
-  --surface-elevated: #222222;
-  --border: #2a2a2a;
-  --border-light: #333333;
-  --text: #f0f0f0;
-  --text-secondary: #aaaaaa;
-  --text-muted: #666666;
-  --accent: #e84040;
-  --accent-hover: #dc2626;
-  --success: #22c55e;
-  --warning: #d97706;
-  --info: #2563eb;
-  --danger: #dc2626;
-  --input-bg: #0e0e0e;
-  --scrollbar-thumb: #2a2a2a;
-  --scrollbar-thumb-hover: #3a3a3a;
-  --shadow: rgba(0, 0, 0, 0.35);
-}
-
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg);
+  background: var(--ontrack-bg);
   font-family: 'Inter', sans-serif;
-  color: var(--text);
+  color: var(--ontrack-text);
   transition: background 0.25s ease, color 0.25s ease;
 }
 
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+::-webkit-scrollbar-thumb { background: var(--ontrack-scrollbar-thumb); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--ontrack-scrollbar-thumb-hover); }
 
 input, textarea, select, button { font-family: 'Inter', sans-serif; }
 
-button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent) !important; }
+button:focus-visible { outline: 2px solid var(--ontrack-primary); outline-offset: 2px; }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--ontrack-primary) !important; }

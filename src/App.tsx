@@ -20,7 +20,7 @@ const STATUS: Record<TaskStatus, { label: string; nodeColor: string; nodeBorder:
   'not-started': { label: 'Not Started', nodeColor: '#ffffff', nodeBorder: '#cccccc', nodeText: '#1a1a1a', dot: '#aaaaaa', pillBg: '#2a2a2a', pillText: '#888888' },
   'in-progress': { label: 'In Progress', nodeColor: '#7a7e1e', nodeBorder: '#9a9e2e', nodeText: '#ffffff', dot: '#c8cc3a', pillBg: '#2a2a10', pillText: '#c8cc3a' },
   'submitted':   { label: 'Submitted',   nodeColor: '#2e4dbb', nodeBorder: '#4a6ad4', nodeText: '#ffffff', dot: '#6a8af4', pillBg: '#131a3a', pillText: '#6a8af4' },
-  'done':        { label: 'Done',        nodeColor: '#1e5c2e', nodeBorder: '#2e8c44', nodeText: '#ffffff', dot: '#4ade80', pillBg: '#0e2218', pillText: '#4ade80' },
+  'done':        { label: 'Done',        nodeColor: '#1e5c2e', nodeBorder: '#2e8c44', nodeText: '#ffffff', dot: 'var(--ontrack-success)', pillBg: '#0e2218', pillText: 'var(--ontrack-success)' },
   'revision':    { label: 'Need Revision', nodeColor: '#b84a00', nodeBorder: '#e06000', nodeText: '#ffffff', dot: '#f97316', pillBg: '#2a1500', pillText: '#f97316' },
   'late':        { label: 'Late',        nodeColor: '#b02020', nodeBorder: '#d43030', nodeText: '#ffffff', dot: '#f87171', pillBg: '#2a0e0e', pillText: '#f87171' },
 }
@@ -28,11 +28,11 @@ const STATUS: Record<TaskStatus, { label: string; nodeColor: string; nodeBorder:
 // ─── Shared styles ─────────────────────────────────────────────────────────────
 
 const S = {
-  red: { background: '#e84040', border: 'none', color: '#fff', fontSize: '13px', fontWeight: 600, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
-  ghost: { background: 'transparent', border: '1px solid #333', color: '#b0b0b0', fontSize: '13px', fontWeight: 500, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
-  danger: { background: 'transparent', border: '1px solid #e84040', color: '#e84040', fontSize: '13px', fontWeight: 500, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
-  label: { display: 'block', fontSize: '11px', fontWeight: 600, color: '#777', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' } as React.CSSProperties,
-  input: { display: 'block', width: '100%', background: '#0e0e0e', border: '1px solid #333', color: '#f0f0f0', fontSize: '14px', padding: '10px 12px', borderRadius: '5px', marginBottom: '14px', boxSizing: 'border-box' } as React.CSSProperties,
+  red: { background: 'var(--ontrack-primary)', border: 'none', color: '#fff', fontSize: '13px', fontWeight: 600, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
+  ghost: { background: 'transparent', border: '1px solid var(--ontrack-border)', color: 'var(--ontrack-text-secondary)', fontSize: '13px', fontWeight: 500, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
+  danger: { background: 'transparent', border: '1px solid var(--ontrack-primary)', color: 'var(--ontrack-primary)', fontSize: '13px', fontWeight: 500, padding: '9px 18px', borderRadius: '5px', cursor: 'pointer' } as React.CSSProperties,
+  label: { display: 'block', fontSize: '11px', fontWeight: 600, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '6px' } as React.CSSProperties,
+  input: { display: 'block', width: '100%', background: 'var(--ontrack-input-bg)', border: '1px solid var(--ontrack-border)', color: 'var(--ontrack-text)', fontSize: '14px', padding: '10px 12px', borderRadius: '5px', marginBottom: '14px', boxSizing: 'border-box' } as React.CSSProperties,
 }
 
 // ─── Root app ──────────────────────────────────────────────────────────────────
@@ -461,11 +461,11 @@ export default function App() {
           {archivedRooms.length === 0
             ? <Empty text="No archived rooms." />
             : archivedRooms.map(r => (
-              <div key={r.id} style={{ background: '#1a1a1a', border: '1px solid #2a2a2a', borderRadius: '7px', padding: '18px 22px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+              <div key={r.id} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '18px 22px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
                 <div>
                   <div style={{ fontWeight: 700, marginBottom: '3px' }}>{r.title}</div>
-                  <div style={{ fontSize: '13px', color: '#666', marginBottom: '3px' }}>{r.description}</div>
-                  <div style={{ fontSize: '12px', color: '#444' }}>Leader: {userDB.find(r.leaderId)?.name}</div>
+                  <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', marginBottom: '3px' }}>{r.description}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Leader: {userDB.find(r.leaderId)?.name}</div>
                 </div>
                 <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <button style={{ ...S.ghost, fontSize: '12px', padding: '6px 12px' }} onClick={() => { unarchiveRoom(r.id) }}>Unarchive</button>
@@ -487,17 +487,17 @@ export default function App() {
         return (
           <>
             {/* Room header + tab bar */}
-            <div style={{ borderBottom: '1px solid #1e1e1e', padding: '0 32px', background: '#111', flexShrink: 0 }}>
+            <div style={{ borderBottom: '1px solid var(--ontrack-border)', padding: '0 32px', background: 'var(--ontrack-bg)', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '20px', paddingBottom: '4px' }}>
                 <div>
                   <div style={{ fontSize: '18px', fontWeight: 800 }}>{currentRoom.title}</div>
-                  <div style={{ fontSize: '12px', color: '#555', marginTop: '2px' }}>{currentRoom.description}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)', marginTop: '2px' }}>{currentRoom.description}</div>
                 </div>
                 {myRole === 'leader' && (
                   <div style={{ position: 'relative', flexShrink: 0 }}>
                     <button style={{ ...S.ghost, fontSize: '12px', padding: '6px 14px' }} onClick={() => setShowRoomMenu(v => !v)}>⋯</button>
                     {showRoomMenu && (
-                      <div style={{ position: 'absolute', right: 0, top: '110%', background: '#191919', border: '1px solid #252525', borderRadius: '7px', minWidth: '170px', zIndex: 60, overflow: 'hidden' }}>
+                      <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', minWidth: '170px', zIndex: 60, overflow: 'hidden' }}>
                         <DropItem label="Archive Room" onClick={() => { archiveRoom(currentRoom.id); setShowRoomMenu(false) }} />
                         <DropItem label="Delete Room" danger onClick={() => { setMDeleteRoom(true); setShowRoomMenu(false) }} />
                       </div>
@@ -510,8 +510,8 @@ export default function App() {
                   <button key={t} onClick={() => setRoomTab(t)} style={{
                     background: 'none', border: 'none', padding: '10px 20px', fontSize: '13px',
                     cursor: 'pointer', fontWeight: roomTab === t ? 600 : 400,
-                    color: roomTab === t ? '#f0f0f0' : '#555',
-                    borderBottom: `2px solid ${roomTab === t ? '#e84040' : 'transparent'}`,
+                    color: roomTab === t ? 'var(--ontrack-text)' : 'var(--ontrack-text-muted)',
+                    borderBottom: `2px solid ${roomTab === t ? 'var(--ontrack-primary)' : 'transparent'}`,
                     transition: 'color 0.15s',
                   }}>
                     {t === 'mytasks' ? 'My Tasks' : t.charAt(0).toUpperCase() + t.slice(1)}
@@ -553,12 +553,12 @@ export default function App() {
                   {filteredTasks.length === 0
                     ? <Empty text={myTasks.length === 0 ? 'No tasks assigned to you.' : 'No tasks match this filter.'} />
                     : filteredTasks.map(task => (
-                      <div key={task.id} onClick={() => setMTaskDetail(task)} style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '7px', padding: '16px 20px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', cursor: 'pointer' }}
-                        onMouseEnter={e => (e.currentTarget.style.borderColor = '#333')}
-                        onMouseLeave={e => (e.currentTarget.style.borderColor = '#252525')}>
+                      <div key={task.id} onClick={() => setMTaskDetail(task)} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '16px 20px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', cursor: 'pointer' }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--ontrack-border)')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--ontrack-border)')}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, marginBottom: '4px' }}>{task.title}</div>
-                          <div style={{ fontSize: '12px', color: '#555' }}>Due {task.deadline}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Due {task.deadline}</div>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                           <StatusBadge status={task.status} />
@@ -593,25 +593,25 @@ export default function App() {
               {roomTab === 'members' && (
                 <div style={{ padding: '24px 32px' }}>
                   {myRole === 'leader' && (
-                    <div style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '7px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '11px', fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Join Code</span>
-                      <code style={{ fontFamily: "'DM Mono', monospace", fontSize: '17px', fontWeight: 700, letterSpacing: '0.15em', color: '#f0f0f0' }}>{currentRoom.code}</code>
+                    <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '14px 20px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Join Code</span>
+                      <code style={{ fontFamily: "'DM Mono', monospace", fontSize: '17px', fontWeight: 700, letterSpacing: '0.15em', color: 'var(--ontrack-text)' }}>{currentRoom.code}</code>
                       <button style={{ ...S.ghost, fontSize: '11px', padding: '4px 10px', marginLeft: 'auto' }}
                         onClick={() => navigator.clipboard?.writeText(currentRoom.code)}>Copy</button>
                     </div>
                   )}
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                      {members.map(m => (
-                       <div key={m.userId} style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '7px', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                       <div key={m.userId} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                           <Avatar name={m.user.name} color={m.role === 'leader' ? '#e84040' : '#2a2a2a'} />
+                           <Avatar name={m.user.name} color={m.role === 'leader' ? 'var(--ontrack-primary)' : 'var(--ontrack-border)'} />
                            <div>
                              <div style={{ fontWeight: 500 }}>{m.user.name}</div>
-                             <div style={{ fontSize: '12px', color: '#555' }}>{m.user.email}</div>
+                             <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>{m.user.email}</div>
                            </div>
                          </div>
                          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                           <span style={{ fontSize: '11px', fontWeight: 700, color: m.role === 'leader' ? '#e84040' : '#555', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.role}</span>
+                           <span style={{ fontSize: '11px', fontWeight: 700, color: m.role === 'leader' ? 'var(--ontrack-primary)' : 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{m.role}</span>
                            {myRole === 'leader' && m.role !== 'leader' && (
                              <button style={{ ...S.danger, fontSize: '11px', padding: '4px 10px' }} onClick={() => { if (confirm(`Remove ${m.user.name}?`)) removeMember(currentRoom.id, m.userId) }}>Remove</button>
                            )}
@@ -620,7 +620,7 @@ export default function App() {
                      ))}
                    </div>
                    {myRole === 'member' && (
-                     <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid #252525' }}>
+                     <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--ontrack-border)' }}>
                        <button style={{ ...S.danger, width: '100%' }} onClick={() => { if (confirm('Leave this room?')) leaveRoom(currentRoom.id) }}>Leave Room</button>
                      </div>
                    )}
@@ -647,14 +647,14 @@ export default function App() {
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, flex: 1, paddingRight: '12px' }}>{mTaskDetail.title}</h3>
                   <StatusBadge status={mTaskDetail.status} />
                 </div>
-                <p style={{ color: '#888', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
+                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                   <InfoBox label="Assignees" value={mTaskDetail.assigneeIds.length ? mTaskDetail.assigneeIds.map(id => getUserName(id)).join(', ') : 'Unassigned'} />
                   <InfoBox label="Deadline" value={mTaskDetail.deadline} />
                 </div>
                 {mTaskDetail.submissionLink && (
                   <div style={{ marginBottom: '14px' }}>
-                    <InfoBox label="Submission Link" value={<a href={mTaskDetail.submissionLink} target="_blank" rel="noopener noreferrer" style={{ color: '#60a5fa', fontSize: '13px', wordBreak: 'break-all' }}>{mTaskDetail.submissionLink}</a>} />
+                    <InfoBox label="Submission Link" value={<a href={mTaskDetail.submissionLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ontrack-info)', fontSize: '13px', wordBreak: 'break-all' }}>{mTaskDetail.submissionLink}</a>} />
                   </div>
                 )}
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
@@ -703,8 +703,8 @@ export default function App() {
             {/* ── Delete Room Confirm ── */}
             {mDeleteRoom && (
               <Modal title="Delete Room" onClose={() => setMDeleteRoom(false)}>
-                <p style={{ color: '#aaa', fontSize: '14px', marginBottom: '20px', lineHeight: 1.6 }}>
-                  Are you sure you want to permanently delete <strong style={{ color: '#f0f0f0' }}>{currentRoom.title}</strong>? This will remove all tasks, members, and messages. This action cannot be undone.
+                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', marginBottom: '20px', lineHeight: 1.6 }}>
+                  Are you sure you want to permanently delete <strong style={{ color: 'var(--ontrack-text)' }}>{currentRoom.title}</strong>? This will remove all tasks, members, and messages. This action cannot be undone.
                 </p>
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <button style={{ ...S.danger, flex: 1 }} onClick={() => deleteRoom(currentRoom.id)}>Delete Room</button>
@@ -742,30 +742,30 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
   onRoomClick: (id: string) => void
 }) {
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#111', color: '#f0f0f0', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--ontrack-bg)', color: 'var(--ontrack-text)', fontFamily: 'Inter, sans-serif' }}>
       {/* Top nav */}
-      <header style={{ height: '50px', background: '#0d0d0d', borderBottom: '1px solid #1e1e1e', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0, zIndex: 50 }}>
+      <header style={{ height: '50px', background: 'var(--ontrack-bg)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <button onClick={() => setView('home')} style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', fontWeight: 700, letterSpacing: '0.18em', color: '#f0f0f0', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>ONTRACK</button>
-          {view === 'room' && currentRoom && <span style={{ fontSize: '12px', color: '#3a3a3a' }}>/ {currentRoom.title}</span>}
+          <button onClick={() => setView('home')} style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>ONTRACK</button>
+          {view === 'room' && currentRoom && <span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>/ {currentRoom.title}</span>}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <div style={{ position: 'relative' }}>
-            <button onClick={onToggleNotifs} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: '#666', fontSize: '15px', position: 'relative' }}>
+            <button onClick={onToggleNotifs} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: 'var(--ontrack-text-muted)', fontSize: '15px', position: 'relative' }}>
               🔔
-              {unread > 0 && <span style={{ position: 'absolute', top: '2px', right: '4px', minWidth: '16px', height: '16px', background: '#e84040', borderRadius: '8px', border: '2px solid #0d0d0d', fontSize: '10px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>{unread > 9 ? '9+' : unread}</span>}
+              {unread > 0 && <span style={{ position: 'absolute', top: '2px', right: '4px', minWidth: '16px', height: '16px', background: 'var(--ontrack-primary)', borderRadius: '8px', border: '2px solid var(--ontrack-bg)', fontSize: '10px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>{unread > 9 ? '9+' : unread}</span>}
             </button>
             {showNotifs && (
-              <div style={{ position: 'absolute', right: 0, top: '110%', background: '#191919', border: '1px solid #252525', borderRadius: '9px', width: '320px', zIndex: 200, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
-                <div style={{ padding: '12px 16px', borderBottom: '1px solid #222', fontSize: '11px', fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Notifications</div>
+              <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '9px', width: '320px', zIndex: 200, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
+                <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ontrack-border)', fontSize: '11px', fontWeight: 700, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Notifications</div>
                 {notifications.length === 0
-                  ? <div style={{ padding: '20px 16px', color: '#555', fontSize: '13px', textAlign: 'center' }}>All caught up!</div>
+                  ? <div style={{ padding: '20px 16px', color: 'var(--ontrack-text-muted)', fontSize: '13px', textAlign: 'center' }}>All caught up!</div>
                   : notifications.slice(0, 8).map(n => (
-                    <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', color: n.read ? '#666' : '#bbb', borderBottom: '1px solid #1a1a1a', display: 'flex', gap: '10px' }}>
-                      <span style={{ color: n.read ? '#333' : '#e84040', flexShrink: 0, marginTop: '1px' }}>●</span>
+                    <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', color: n.read ? 'var(--ontrack-text-muted)' : 'var(--ontrack-text-secondary)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
+                      <span style={{ color: n.read ? 'var(--ontrack-border)' : 'var(--ontrack-primary)', flexShrink: 0, marginTop: '1px' }}>●</span>
                       <div style={{ flex: 1 }}>
                         <div>{n.text}</div>
-                        <div style={{ fontSize: '11px', color: '#444', marginTop: '3px' }}>{relativeTime(n.createdAt)}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginTop: '3px' }}>{relativeTime(n.createdAt)}</div>
                       </div>
                     </div>
                   ))
@@ -774,7 +774,7 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
             )}
           </div>
           {currentUser && (
-             <button onClick={() => setView('profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: '#aaa', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <button onClick={() => setView('profile')} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: 'var(--ontrack-text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                <span style={{ maxWidth: '100px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{currentUser.name}</span>
              </button>
           )}
@@ -783,14 +783,14 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* Sidebar */}
-        <aside style={{ width: '210px', background: '#f2f2f2', borderRight: '1px solid #e0e0e0', display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto' }}>
+        <aside style={{ width: '210px', background: 'var(--ontrack-surface-elevated)', borderRight: '1px solid var(--ontrack-text)', display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto' }}>
           <div style={{ padding: '14px 10px' }}>
             {view === 'room' && currentRoom && (() => {
               const role = memberDB.role(currentRoom.id, currentUser?.id ?? '')
               const tabs = (['flowchart','mytasks','chat','members',...(role === 'leader' ? ['settings'] : [])] as RoomTab[])
               return (
               <>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px', marginBottom: '6px' }}>Navigation</div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ontrack-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px', marginBottom: '6px' }}>Navigation</div>
                 {tabs.map(t => (
                   <SidebarBtn key={t} label={t === 'mytasks' ? 'My Tasks' : t.charAt(0).toUpperCase() + t.slice(1)} active={roomTab === t} onClick={() => setRoomTab(t)} />
                 ))}
@@ -798,19 +798,19 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
               </>
               )
             })()}
-            <div style={{ fontSize: '10px', fontWeight: 700, color: '#aaa', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px', marginBottom: '6px' }}>Rooms</div>
+            <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ontrack-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px', marginBottom: '6px' }}>Rooms</div>
             {activeRooms.length === 0
-              ? <div style={{ padding: '8px 10px', fontSize: '12px', color: '#aaa' }}>No rooms yet.</div>
+              ? <div style={{ padding: '8px 10px', fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>No rooms yet.</div>
               : activeRooms.map(r => (
                 <button key={r.id} onClick={() => onRoomClick(r.id)} style={{
                   display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px 8px 11px',
-                  background: currentRoom?.id === r.id ? '#e4e4e4' : 'transparent',
-                  border: 'none', borderRadius: '5px', fontSize: '13px', color: '#333',
-                  cursor: 'pointer', marginBottom: '2px',
-                  borderLeft: `3px solid ${r.color}`,
-                  fontFamily: 'Inter, sans-serif', fontWeight: currentRoom?.id === r.id ? 600 : 400,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>{r.title}</button>
+                   background: currentRoom?.id === r.id ? 'var(--ontrack-border)' : 'transparent',
+                   border: 'none', borderRadius: '5px', fontSize: '13px', color: 'var(--ontrack-text-secondary)',
+                   cursor: 'pointer', marginBottom: '2px',
+                   borderLeft: `3px solid ${r.color}`,
+                   fontFamily: 'Inter, sans-serif', fontWeight: currentRoom?.id === r.id ? 600 : 400,
+                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                 }}>{r.title}</button>
               ))
             }
             <Divider />
@@ -834,13 +834,13 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
-        <ellipse cx="25%" cy="55%" rx="48%" ry="38%" fill="none" stroke="var(--border)" strokeWidth="1.5" transform="rotate(-12,400,400)" />
+        <ellipse cx="25%" cy="55%" rx="48%" ry="38%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-12,400,400)" />
         <ellipse cx="72%" cy="35%" rx="38%" ry="30%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(8,700,300)" />
         <ellipse cx="55%" cy="75%" rx="55%" ry="22%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-3,600,500)" />
-        <ellipse cx="80%" cy="62%" rx="28%" ry="42%" fill="none" stroke="var(--border)" strokeWidth="1.5" transform="rotate(18,800,500)" />
+        <ellipse cx="80%" cy="62%" rx="28%" ry="42%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(18,800,500)" />
         <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-25,200,200)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--border)' }}>
+      <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
         <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--text)' }}>ONTRACK</span>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button onClick={onLogin} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
@@ -894,19 +894,19 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   }
 
   return (
-    <div data-auth="true" style={{ minHeight: '100vh', background: '#0a0a0a', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div data-auth="true" style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.5 }} preserveAspectRatio="none">
-        <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="#1e1e1e" strokeWidth="1.5" transform="rotate(-10,400,450)" />
-        <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="#191919" strokeWidth="1" transform="rotate(12,700,250)" />
+        <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-10,400,450)" />
+        <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid #171717' }}>
-        <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: '#f0f0f0', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
+      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
+        <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ background: '#131313', border: '1px solid #222', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '380px' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: '#f0f0f0' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
-          <p style={{ fontSize: '13px', color: '#555', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
-          {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: '#e84040' }}>{error}</div>}
+        <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '380px' }}>
+          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: 'var(--ontrack-text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
+          <p style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
+          {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
           {!isLogin && (
             <div>
               <label style={S.label}>Full Name</label>
@@ -918,7 +918,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           <label style={S.label}>Password</label>
           <div style={{ position: 'relative', marginBottom: '14px' }}>
             <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {showPassword ? (
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
               ) : (
@@ -931,7 +931,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               <label style={S.label}>Confirm Password</label>
               <div style={{ position: 'relative' }}>
                 <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirm ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <button type="button" onClick={() => setShowConfirm(!showConfirm)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   {showConfirm ? (
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                   ) : (
@@ -943,8 +943,8 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           )}
           {!isLogin && (
             <div style={{ marginBottom: '16px' }}>
-              <div style={{ background: '#111', border: '1px solid #252525', borderRadius: '7px', padding: '14px', fontSize: '12px', color: '#888', lineHeight: 1.6, maxHeight: showFullTerms ? 'none' : '120px', overflow: 'hidden' }}>
-                <strong style={{ color: '#ccc' }}>OnTrack Terms and Agreement</strong>
+              <div style={{ background: 'var(--ontrack-bg)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '14px', fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.6, maxHeight: showFullTerms ? 'none' : '120px', overflow: 'hidden' }}>
+                <strong style={{ color: 'var(--ontrack-text-muted)' }}>OnTrack Terms and Agreement</strong>
                 <br /><br />
                 <strong>1. Purpose of the System</strong><br />
                 OnTrack is a task and deadline monitoring system developed as a capstone project for academic use by student groups at Bataan Peninsula State University. It is intended to help manage capstone, thesis, and other collaborative group projects.
@@ -975,22 +975,22 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
                 )}
               </div>
               <div style={{ textAlign: 'right', marginTop: '6px' }}>
-                <span onClick={() => setShowFullTerms(v => !v)} style={{ fontSize: '11px', color: '#e84040', cursor: 'pointer', fontWeight: 500 }}>
+                <span onClick={() => setShowFullTerms(v => !v)} style={{ fontSize: '11px', color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 500 }}>
                   {showFullTerms ? 'Show less' : 'Read more'}
                 </span>
               </div>
               <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', cursor: 'pointer' }}>
                 <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
-                <span style={{ fontSize: '12px', color: '#888' }}>I agree to the Terms and Agreement</span>
+                <span style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>I agree to the Terms and Agreement</span>
               </label>
             </div>
           )}
-          {isLogin && <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '14px' }}><span style={{ fontSize: '12px', color: '#555', cursor: 'pointer' }}>Forgot password?</span></div>}
+          {isLogin && <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '14px' }}><span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)', cursor: 'pointer' }}>Forgot password?</span></div>}
           <button onClick={handleSubmit} style={{ ...S.red, width: '100%', padding: '12px', fontSize: '14px' }}>{isLogin ? 'Log in' : 'Register'}</button>
-          {!isLogin && <p style={{ fontSize: '11px', color: '#444', textAlign: 'center', marginTop: '12px' }}>Demo: log in as <strong style={{ color: '#666' }}>alex@uni.edu</strong> / <strong style={{ color: '#666' }}>password</strong></p>}
-          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: '#555' }}>
+          {!isLogin && <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginTop: '12px' }}>Demo: log in as <strong style={{ color: 'var(--ontrack-text-muted)' }}>alex@uni.edu</strong> / <strong style={{ color: 'var(--ontrack-text-muted)' }}>password</strong></p>}
+          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
-            <span onClick={onSwitch} style={{ color: '#e84040', cursor: 'pointer', fontWeight: 500 }}>{isLogin ? 'Register' : 'Log in'}</span>
+            <span onClick={onSwitch} style={{ color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 500 }}>{isLogin ? 'Register' : 'Log in'}</span>
           </p>
         </div>
       </div>
@@ -1018,18 +1018,18 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
   return (
     <div style={{ padding: '40px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '32px' }}>
-        <Avatar name={user.name} size={56} color="#2563eb" />
+        <Avatar name={user.name} size={56} color="var(--ontrack-primary)" />
         <div>
           <div style={{ fontSize: '18px', fontWeight: 700 }}>{user.name}</div>
-          <div style={{ fontSize: '13px', color: '#666' }}>{user.email}</div>
+          <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>{user.email}</div>
         </div>
       </div>
-      <div style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '8px', padding: '18px 24px', maxWidth: '440px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '18px 24px', maxWidth: '440px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px', color: '#e0e0e0' }}>Appearance</div>
-          <div style={{ fontSize: '12px', color: '#666' }}>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</div>
+          <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px', color: 'var(--ontrack-text)' }}>Appearance</div>
+          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</div>
         </div>
-        <button onClick={onToggleTheme} style={{ background: '#252525', border: '1px solid #333', borderRadius: '6px', padding: '8px 16px', color: '#f0f0f0', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <button onClick={onToggleTheme} style={{ background: 'var(--ontrack-border)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '8px 16px', color: 'var(--ontrack-text)', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
           {theme === 'dark' ? (
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
           ) : (
@@ -1038,13 +1038,13 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
           {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </button>
       </div>
-      <div style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: '#e0e0e0' }}>Change Password</h3>
-        {msg && <div style={{ background: msg.ok ? '#163326' : '#2a1515', border: `1px solid ${msg.ok ? '#22c55e30' : '#e8404030'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: msg.ok ? '#4ade80' : '#e84040' }}>{msg.text}</div>}
+      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Password</h3>
+        {msg && <div style={{ background: msg.ok ? '#163326' : '#2a1515', border: `1px solid ${msg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: msg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{msg.text}</div>}
         <label style={S.label}>Current Password</label>
         <div style={{ position: 'relative', marginBottom: '14px' }}>
           <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showCurrent ? "text" : "password"} value={current} onChange={e => setCurrent(e.target.value)} placeholder="••••••••" />
-          <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {showCurrent ? (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             ) : (
@@ -1055,7 +1055,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
         <label style={S.label}>New Password</label>
         <div style={{ position: 'relative', marginBottom: '14px' }}>
           <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showNext ? "text" : "password"} value={next} onChange={e => setNext(e.target.value)} placeholder="Min. 6 characters" />
-          <button type="button" onClick={() => setShowNext(!showNext)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button type="button" onClick={() => setShowNext(!showNext)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {showNext ? (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             ) : (
@@ -1066,7 +1066,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
         <label style={S.label}>Confirm New Password</label>
         <div style={{ position: 'relative' }}>
           <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirmNew ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
-          <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: '#666', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {showConfirmNew ? (
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
             ) : (
@@ -1095,15 +1095,15 @@ function SettingsView({ room, myRole, onUpdate, onArchive, onDelete, onLeave }: 
 
   return (
     <div style={{ padding: '28px 32px' }}>
-      <div style={{ background: '#1a1a1a', border: '1px solid #252525', borderRadius: '8px', padding: '24px', maxWidth: '500px', marginBottom: '16px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: '#e0e0e0' }}>Room Settings</h3>
+      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '500px', marginBottom: '16px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Room Settings</h3>
         <label style={S.label}>Project Title</label>
         <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} />
         <label style={S.label}>Description</label>
         <textarea style={{ ...S.input, height: '80px', resize: 'none' }} value={desc} onChange={e => setDesc(e.target.value)} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button style={S.red} onClick={save}>Save Changes</button>
-          {saved && <span style={{ fontSize: '13px', color: '#4ade80' }}>✓ Saved</span>}
+          {saved && <span style={{ fontSize: '13px', color: 'var(--ontrack-success)' }}>✓ Saved</span>}
         </div>
       </div>
       {myRole === 'leader' && (
@@ -1219,17 +1219,17 @@ function FlowchartCanvas({ tasks, taskDeps, statusFilter, getUserName, onTaskCli
   )
 
   return (
-    <div style={{ background: '#0d0d0d', border: '1px solid #1e1e1e', borderRadius: '8px', overflow: 'auto' }}>
+    <div style={{ background: 'var(--ontrack-bg)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', overflow: 'auto' }}>
       <div style={{ position: 'relative', width: canvasW, height: canvasH, minHeight: 500 }}>
         <svg style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }} width={canvasW} height={canvasH}>
           <defs>
             <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
-              <polygon points="0 0, 7 3.5, 0 7" fill="#555" />
+              <polygon points="0 0, 7 3.5, 0 7" fill="var(--ontrack-text-muted)" />
             </marker>
           </defs>
           {edges.map((e: any) => {
             const cy = (e.y1 + e.y2) / 2
-            return <path key={e.key} d={`M ${e.x1} ${e.y1} C ${e.x1} ${cy}, ${e.x2} ${cy}, ${e.x2} ${e.y2}`} fill="none" stroke="#555" strokeWidth="1.5" markerEnd="url(#arr)" />
+            return <path key={e.key} d={`M ${e.x1} ${e.y1} C ${e.x1} ${cy}, ${e.x2} ${cy}, ${e.x2} ${e.y2}`} fill="none" stroke="var(--ontrack-text-muted)" strokeWidth="1.5" markerEnd="url(#arr)" />
           })}
         </svg>
         {tasks.map(task => {
@@ -1238,8 +1238,8 @@ function FlowchartCanvas({ tasks, taskDeps, statusFilter, getUserName, onTaskCli
           return (
             <div key={task.id} onClick={() => onTaskClick(task)} style={{
               position: 'absolute', left: task.x, top: task.y, width: nodeW, minHeight: nodeH,
-              background: visible ? cfg.nodeColor : '#222',
-              border: `2px solid ${visible ? cfg.nodeBorder : '#333'}`,
+              background: visible ? cfg.nodeColor : 'var(--ontrack-border)',
+              border: `2px solid ${visible ? cfg.nodeBorder : 'var(--ontrack-border)'}`,
               borderRadius: '10px', padding: '10px 14px', cursor: 'pointer',
               opacity: visible ? 1 : 0.18,
               transition: 'opacity 0.2s, transform 0.15s, box-shadow 0.15s',
@@ -1248,8 +1248,8 @@ function FlowchartCanvas({ tasks, taskDeps, statusFilter, getUserName, onTaskCli
               onMouseEnter={e => { if (visible) { e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.5)' } }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = visible ? '0 2px 8px rgba(0,0,0,0.35)' : 'none' }}
             >
-              <div style={{ fontSize: '12px', fontWeight: 700, color: visible ? cfg.nodeText : '#555', lineHeight: 1.3, marginBottom: '3px' }}>{task.title}</div>
-              <div style={{ fontSize: '10px', color: visible ? (cfg.nodeColor === '#ffffff' ? '#777' : `${cfg.nodeText}99`) : '#444' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: visible ? cfg.nodeText : 'var(--ontrack-text-muted)', lineHeight: 1.3, marginBottom: '3px' }}>{task.title}</div>
+              <div style={{ fontSize: '10px', color: visible ? (cfg.nodeColor === '#ffffff' ? 'var(--ontrack-text-muted)' : `${cfg.nodeText}99`) : 'var(--ontrack-text-muted)' }}>
                 {task.assigneeIds.length ? task.assigneeIds.map(id => getUserName(id)).join(', ') : 'Unassigned'}
               </div>
             </div>
@@ -1272,18 +1272,18 @@ function ChatView({ messages, currentUserId, getUserName, chatInput, setChatInpu
           const mine = m.senderId === currentUserId
           return (
             <div key={m.id} style={{ display: 'flex', justifyContent: mine ? 'flex-end' : 'flex-start', gap: '10px', alignItems: 'flex-end' }}>
-              {!mine && <Avatar name={getUserName(m.senderId)} size={32} color="#1e1e1e" />}
+              {!mine && <Avatar name={getUserName(m.senderId)} size={32} color="var(--ontrack-border)" />}
               <div style={{ maxWidth: '58%' }}>
-                {!mine && <div style={{ fontSize: '11px', color: '#555', marginBottom: '4px' }}>{getUserName(m.senderId)}</div>}
-                <div style={{ background: mine ? '#1d4ed8' : '#1e1e1e', padding: '10px 14px', borderRadius: mine ? '12px 12px 2px 12px' : '12px 12px 12px 2px', fontSize: '14px', color: '#f0f0f0', lineHeight: 1.5 }}>{m.text}</div>
-                <div style={{ fontSize: '10px', color: '#444', marginTop: '3px', textAlign: mine ? 'right' : 'left' }}>{fmtTime(m.createdAt)}</div>
+                {!mine && <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginBottom: '4px' }}>{getUserName(m.senderId)}</div>}
+                <div style={{ background: mine ? 'var(--ontrack-info)' : 'var(--ontrack-border)', padding: '10px 14px', borderRadius: mine ? '12px 12px 2px 12px' : '12px 12px 12px 2px', fontSize: '14px', color: 'var(--ontrack-text)', lineHeight: 1.5 }}>{m.text}</div>
+                <div style={{ fontSize: '10px', color: 'var(--ontrack-text-muted)', marginTop: '3px', textAlign: mine ? 'right' : 'left' }}>{fmtTime(m.createdAt)}</div>
               </div>
             </div>
           )
         })}
         <div ref={bottomRef} />
       </div>
-      <div style={{ padding: '14px 32px', borderTop: '1px solid #1e1e1e', display: 'flex', gap: '10px' }}>
+      <div style={{ padding: '14px 32px', borderTop: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
         <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === 'Enter' && onSend()} style={{ ...S.input, flex: 1, marginBottom: 0 }} placeholder="Type a message…" />
         <button onClick={onSend} style={{ ...S.red, padding: '10px 18px' }}>Send</button>
       </div>
@@ -1297,10 +1297,10 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.78)', zIndex: 300, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <div style={{ background: '#161616', border: '1px solid #252525', borderRadius: '10px', padding: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 16px 48px rgba(0,0,0,0.7)' }}>
+      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '28px', width: '100%', maxWidth: '440px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 16px 48px rgba(0,0,0,0.7)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{title}</h3>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#555', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
         </div>
         {children}
       </div>
@@ -1321,7 +1321,7 @@ function CreateRoomModal({ roomCount, onClose, onSave }: { roomCount: number; on
       <label style={S.label}>Room Color</label>
       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
         {ROOM_COLORS.map(c => (
-          <button key={c} onClick={() => setColor(c)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: c, border: `2px solid ${color === c ? '#fff' : 'transparent'}`, cursor: 'pointer', padding: 0, outline: 'none' }} />
+          <button key={c} onClick={() => setColor(c)} style={{ width: '32px', height: '32px', borderRadius: '50%', background: c, border: `2px solid ${color === c ? '#fff' : 'transparent'}`, cursor: 'pointer', padding: 0 }} />
         ))}
       </div>
       <button style={{ ...S.red, width: '100%' }} onClick={() => { if (!title.trim()) return; onSave(title, desc, color) }}>Create Room</button>
@@ -1333,7 +1333,7 @@ function JoinRoomModal({ onClose, onJoin }: { onClose: () => void; onJoin: (code
   const [code, setCode] = useState('')
   return (
     <Modal title="Join Room" onClose={onClose}>
-      <p style={{ fontSize: '13px', color: '#666', marginBottom: '16px' }}>Ask your team leader for the room code.</p>
+      <p style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', marginBottom: '16px' }}>Ask your team leader for the room code.</p>
       <label style={S.label}>Room Code</label>
       <input style={S.input} value={code} onChange={e => setCode(e.target.value.toUpperCase())} placeholder="e.g. CAP001" maxLength={8} autoFocus onKeyDown={e => e.key === 'Enter' && code.trim() && onJoin(code)} />
       <button style={{ ...S.red, width: '100%' }} onClick={() => { if (!code.trim()) return; onJoin(code) }}>Join Room</button>
@@ -1416,7 +1416,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
         <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{isEditing ? 'Edit Task' : 'Add Task'}</h3>
         {isEditing && (
-          <button onClick={handleDelete} style={{ background: 'none', border: 'none', color: '#e84040', fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
+          <button onClick={handleDelete} style={{ background: 'none', border: 'none', color: 'var(--ontrack-primary)', fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
         )}
       </div>
       <label style={S.label}>Task Title</label>
@@ -1427,21 +1427,21 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '14px' }}>
         {members.map(m => (
           <button key={m.userId} onClick={() => setAssigneeIds(d => d.includes(m.userId) ? d.filter(x => x !== m.userId) : [...d, m.userId])}
-            style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid #333', fontSize: '12px', cursor: 'pointer', background: assigneeIds.includes(m.userId) ? '#e84040' : '#1a1a1a', color: assigneeIds.includes(m.userId) ? '#fff' : '#888' }}>
+            style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid var(--ontrack-border)', fontSize: '12px', cursor: 'pointer', background: assigneeIds.includes(m.userId) ? 'var(--ontrack-primary)' : 'var(--ontrack-surface)', color: assigneeIds.includes(m.userId) ? '#fff' : 'var(--ontrack-text-secondary)' }}>
             {m.user.name} ({m.role})
           </button>
         ))}
       </div>
       <label style={S.label}>Deadline</label>
-      <input type="date" style={{ ...S.input, borderColor: deadlineError ? '#e84040' : undefined }} value={deadline} onChange={e => handleDeadlineChange(e.target.value)} min={new Date().toISOString().split('T')[0]} />
-      {deadlineError && <div style={{ color: '#e84040', fontSize: '12px', marginTop: '6px' }}>{deadlineError}</div>}
+      <input type="date" style={{ ...S.input, borderColor: deadlineError ? 'var(--ontrack-primary)' : undefined }} value={deadline} onChange={e => handleDeadlineChange(e.target.value)} min={new Date().toISOString().split('T')[0]} />
+      {deadlineError && <div style={{ color: 'var(--ontrack-primary)', fontSize: '12px', marginTop: '6px' }}>{deadlineError}</div>}
       {existingTasks.length > 0 && (
         <>
           <label style={S.label}>Dependencies (optional)</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
             {existingTasks.map(t => (
               <button key={t.id} onClick={() => setDeps(d => d.includes(t.id) ? d.filter(x => x !== t.id) : [...d, t.id])}
-                style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid #333', fontSize: '12px', cursor: 'pointer', background: deps.includes(t.id) ? '#e84040' : '#1a1a1a', color: deps.includes(t.id) ? '#fff' : '#888' }}>
+                style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid var(--ontrack-border)', fontSize: '12px', cursor: 'pointer', background: deps.includes(t.id) ? 'var(--ontrack-primary)' : 'var(--ontrack-surface)', color: deps.includes(t.id) ? '#fff' : 'var(--ontrack-text-secondary)' }}>
                 {t.title}
               </button>
             ))}
@@ -1458,9 +1458,9 @@ function SubmitTaskModal({ task, onClose, onSubmit }: { task: Task; onClose: () 
   const [comment, setComment] = useState('')
   return (
     <Modal title="Submit Task" onClose={onClose}>
-      <div style={{ background: '#0e0e0e', borderRadius: '6px', padding: '12px 14px', marginBottom: '18px' }}>
+      <div style={{ background: 'var(--ontrack-input-bg)', borderRadius: '6px', padding: '12px 14px', marginBottom: '18px' }}>
         <div style={{ fontWeight: 600, marginBottom: '3px' }}>{task.title}</div>
-        <div style={{ fontSize: '12px', color: '#666' }}>Due: {task.deadline}</div>
+        <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Due: {task.deadline}</div>
       </div>
       <label style={S.label}>Link to your work</label>
       <input style={S.input} value={link} onChange={e => setLink(e.target.value)} placeholder="https://docs.google.com/…" autoFocus />
@@ -1519,13 +1519,13 @@ function FilterPill({ active, label, onClick, statusKey }: { active: boolean; la
   return (
     <button onClick={onClick} style={{
       padding: '5px 14px', borderRadius: '20px', fontSize: '12px', cursor: 'pointer',
-      border: active && cfg ? `1.5px solid ${cfg.nodeBorder}` : active ? '1.5px solid #e84040' : '1px solid #2a2a2a',
-      background: active && cfg ? cfg.pillBg : active ? '#e84040' : '#151515',
-      color: active && cfg ? cfg.pillText : active ? '#fff' : '#555',
+      border: active && cfg ? `1.5px solid ${cfg.nodeBorder}` : active ? '1.5px solid var(--ontrack-primary)' : '1px solid var(--ontrack-border)',
+      background: active && cfg ? cfg.pillBg : active ? 'var(--ontrack-primary)' : 'var(--ontrack-surface)',
+      color: active && cfg ? cfg.pillText : active ? '#fff' : 'var(--ontrack-text-muted)',
       fontWeight: active ? 600 : 400, transition: 'all 0.15s',
       display: 'flex', alignItems: 'center', gap: '6px',
     }}>
-      {cfg && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: active ? cfg.dot : '#444', flexShrink: 0 }} />}
+      {cfg && <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: active ? cfg.dot : 'var(--ontrack-text-muted)', flexShrink: 0 }} />}
       {label}
     </button>
   )
@@ -1541,7 +1541,7 @@ function Avatar({ name, color, size = 36 }: { name: string; color: string; size?
 
 function SidebarBtn({ label, active, onClick, dim }: { label: string; active: boolean; onClick: () => void; dim?: boolean }) {
   return (
-    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', background: active ? '#e0e0e0' : 'transparent', border: 'none', borderRadius: '5px', fontSize: '13px', color: dim ? '#888' : '#333', cursor: 'pointer', marginBottom: '2px', fontFamily: 'Inter, sans-serif', fontWeight: active ? 600 : 400 }}>
+    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', background: active ? 'var(--ontrack-text)' : 'transparent', border: 'none', borderRadius: '5px', fontSize: '13px', color: dim ? 'var(--ontrack-text-muted)' : 'var(--ontrack-text-secondary)', cursor: 'pointer', marginBottom: '2px', fontFamily: 'Inter, sans-serif', fontWeight: active ? 600 : 400 }}>
       {label}
     </button>
   )
@@ -1549,8 +1549,8 @@ function SidebarBtn({ label, active, onClick, dim }: { label: string; active: bo
 
 function DropItem({ label, onClick, danger }: { label: string; onClick: () => void; danger?: boolean }) {
   return (
-    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', fontSize: '13px', color: danger ? '#e84040' : '#bbb', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
-      onMouseEnter={e => (e.currentTarget.style.background = '#222')}
+    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '10px 16px', background: 'none', border: 'none', fontSize: '13px', color: danger ? 'var(--ontrack-primary)' : 'var(--ontrack-text-secondary)', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+      onMouseEnter={e => (e.currentTarget.style.background = 'var(--ontrack-border)')}
       onMouseLeave={e => (e.currentTarget.style.background = 'none')}>
       {label}
     </button>
@@ -1559,17 +1559,20 @@ function DropItem({ label, onClick, danger }: { label: string; onClick: () => vo
 
 function InfoBox({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ background: '#0e0e0e', borderRadius: '6px', padding: '12px', marginBottom: '8px' }}>
-      <div style={{ fontSize: '10px', fontWeight: 700, color: '#555', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>{label}</div>
-      <div style={{ fontSize: '14px', color: '#e0e0e0', fontWeight: 500 }}>{value}</div>
+    <div style={{ background: 'var(--ontrack-input-bg)', borderRadius: '6px', padding: '12px', marginBottom: '8px' }}>
+      <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>{label}</div>
+      <div style={{ fontSize: '14px', color: 'var(--ontrack-text)', fontWeight: 500 }}>{value}</div>
     </div>
   )
 }
 
 function Divider() {
-  return <div style={{ height: '1px', background: '#e0e0e0', margin: '10px 8px' }} />
+  return <div style={{ height: '1px', background: 'var(--ontrack-text)', margin: '10px 8px' }} />
 }
 
 function Empty({ text }: { text: string }) {
-  return <div style={{ padding: '40px 0', textAlign: 'center', color: '#555', fontSize: '14px' }}>{text}</div>
+  return <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--ontrack-text-muted)', fontSize: '14px' }}>{text}</div>
 }
+
+
+
