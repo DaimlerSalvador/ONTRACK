@@ -22,3 +22,11 @@ input, textarea, select, button { font-family: 'Inter', sans-serif; }
 
 button:focus-visible { outline: 2px solid var(--ontrack-primary); outline-offset: 2px; }
 input:focus, textarea:focus, select:focus { outline: none; border-color: var(--ontrack-primary) !important; }
+
+.notif-bell { transition: background 0.2s ease, color 0.2s ease; }
+.notif-bell:hover { background: var(--ontrack-primary-tint); }
+.notif-badge { animation: notif-pulse 2s ease-in-out infinite; }
+@keyframes notif-pulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(192, 0, 0, 0.45); }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 5px rgba(192, 0, 0, 0); }
+}

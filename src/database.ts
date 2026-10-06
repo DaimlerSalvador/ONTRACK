@@ -448,7 +448,7 @@ export const taskDB = {
   setDeps(taskId: string, deps: string[]): void {
     save('task_deps', select<TaskDep>('task_deps').filter(d => d.taskId !== taskId))
     const rows = select<TaskDep>('task_deps')
-    deps.forEach(d => rows.push({ taskId, dependsOnId: d }))
+    deps.filter(d => d !== taskId).forEach(d => rows.push({ taskId, dependsOnId: d }))
     save('task_deps', rows)
   },
 

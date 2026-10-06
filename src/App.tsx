@@ -12,7 +12,7 @@ import { applyTheme, stopThemeObserver, type Theme } from './theme'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type View = 'landing' | 'login' | 'register' | 'home' | 'room' | 'profile' | 'archived'
-type RoomTab = 'flowchart' | 'mytasks' | 'chat' | 'members' | 'settings'
+type RoomTab = 'flowchart' | 'alltasks' | 'mytasks' | 'chat' | 'members' | 'settings'
 
 const ROOM_COLORS = ['#7a1c1c', '#1a5230', '#152850', '#7a6200', '#4a1080', '#1a4a5c']
 
@@ -204,7 +204,7 @@ export default function App() {
 
   function goRoom(id: string, tab: RoomTab = 'flowchart') {
     const role = memberDB.role(id, currentUser?.id ?? '')
-    const safeTab = tab === 'settings' && role !== 'leader' ? 'flowchart' : tab
+    const safeTab = (tab === 'settings' || tab === 'alltasks') && role !== 'leader' ? 'flowchart' : tab
     setCurrentRoomId(id)
     setView('room')
     setRoomTab(safeTab)
@@ -481,6 +481,7 @@ export default function App() {
       {view === 'room' && currentRoom && currentUser && (() => {
         const myTasks = tasks.filter(t => t.assigneeIds.includes(currentUser.id))
         const filteredTasks = myTasks.filter(t => statusFilter === 'all' || t.status === statusFilter)
+        const allFilteredTasks = tasks.filter(t => statusFilter === 'all' || t.status === statusFilter)
         const taskDeps = Object.fromEntries(tasks.map(t => [t.id, taskDB.deps(t.id)]))
         const getUserName = (id: string) => userDB.find(id)?.name ?? id
 
@@ -506,7 +507,7 @@ export default function App() {
                 )}
               </div>
               <div style={{ display: 'flex' }}>
-                {(['flowchart', 'mytasks', 'chat', 'members', ...(myRole === 'leader' ? ['settings'] : [])] as RoomTab[]).map(t => (
+                {(['flowchart', ...(myRole === 'leader' ? ['alltasks'] : []), 'mytasks', 'chat', 'members', ...(myRole === 'leader' ? ['settings'] : [])] as RoomTab[]).map(t => (
                   <button key={t} onClick={() => setRoomTab(t)} style={{
                     background: 'none', border: 'none', padding: '10px 20px', fontSize: '13px',
                     cursor: 'pointer', fontWeight: roomTab === t ? 600 : 400,
@@ -514,7 +515,7 @@ export default function App() {
                     borderBottom: `2px solid ${roomTab === t ? 'var(--ontrack-primary)' : 'transparent'}`,
                     transition: 'color 0.15s',
                   }}>
-                    {t === 'mytasks' ? 'My Tasks' : t.charAt(0).toUpperCase() + t.slice(1)}
+                    {t === 'mytasks' ? 'My Tasks' : t === 'alltasks' ? 'All Tasks' : t.charAt(0).toUpperCase() + t.slice(1)}
                   </button>
                 ))}
               </div>
@@ -538,6 +539,38 @@ export default function App() {
                   {tasks.length === 0
                     ? <Empty text="No tasks yet. Add the first task to get started." />
                     : <FlowchartCanvas tasks={tasks} taskDeps={taskDeps} statusFilter={statusFilter} getUserName={getUserName} onTaskClick={setMTaskDetail} />
+                  }
+                </div>
+              )}
+
+              {/* ── All Tasks (leader monitor) ── */}
+              {roomTab === 'alltasks' && myRole === 'leader' && (
+                <div style={{ padding: '24px 32px' }}>
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                    {(['all','not-started','in-progress','submitted','done','revision','late'] as const).map(s => (
+                      <FilterPill key={s} statusKey={s} active={statusFilter === s} label={s === 'all' ? 'All' : STATUS[s as TaskStatus]?.label ?? s} onClick={() => setStatusFilter(s)} />
+                    ))}
+                  </div>
+                  {allFilteredTasks.length === 0
+                    ? <Empty text={tasks.length === 0 ? 'No tasks yet. Add the first task to get started.' : 'No tasks match this filter.'} />
+                    : allFilteredTasks.map(task => (
+                      <div key={task.id} onClick={() => setMTaskDetail(task)} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '16px 20px', marginBottom: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', cursor: 'pointer' }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = 'var(--ontrack-primary)')}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--ontrack-border)')}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 600, marginBottom: '4px' }}>{task.title}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>
+                            Due {task.deadline}
+                            {task.assigneeIds.length > 0 && (
+                              <span style={{ marginLeft: '10px' }}>· {task.assigneeIds.map(id => getUserName(id)).join(', ')}</span>
+                            )}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+                          <StatusBadge status={task.status} />
+                        </div>
+                      </div>
+                    ))
                   }
                 </div>
               )}
@@ -751,9 +784,9 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
           <div style={{ position: 'relative' }}>
-            <button onClick={onToggleNotifs} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '6px 8px', color: 'var(--ontrack-text-muted)', fontSize: '15px', position: 'relative' }}>
+            <button onClick={onToggleNotifs} className={unread > 0 ? 'notif-bell has-unread' : 'notif-bell'} style={{ background: unread > 0 ? 'var(--ontrack-primary-tint)' : 'none', border: 'none', cursor: 'pointer', padding: '6px 10px', color: unread > 0 ? 'var(--ontrack-primary)' : 'var(--ontrack-text-muted)', fontSize: '15px', position: 'relative', borderRadius: '6px' }}>
               🔔
-              {unread > 0 && <span style={{ position: 'absolute', top: '2px', right: '4px', minWidth: '16px', height: '16px', background: 'var(--ontrack-primary)', borderRadius: '8px', border: '2px solid var(--ontrack-bg)', fontSize: '10px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 3px' }}>{unread > 9 ? '9+' : unread}</span>}
+              {unread > 0 && <span className="notif-badge" style={{ position: 'absolute', top: '0px', right: '0px', minWidth: '18px', height: '18px', background: 'var(--ontrack-primary)', borderRadius: '9px', border: '2px solid var(--ontrack-bg)', fontSize: '11px', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>{unread > 9 ? '9+' : unread}</span>}
             </button>
             {showNotifs && (
               <div style={{ position: 'absolute', right: 0, top: '110%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '9px', width: '320px', zIndex: 200, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
@@ -761,11 +794,11 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
                 {notifications.length === 0
                   ? <div style={{ padding: '20px 16px', color: 'var(--ontrack-text-muted)', fontSize: '13px', textAlign: 'center' }}>All caught up!</div>
                   : notifications.slice(0, 8).map(n => (
-                    <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', color: n.read ? 'var(--ontrack-text-muted)' : 'var(--ontrack-text-secondary)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
-                      <span style={{ color: n.read ? 'var(--ontrack-border)' : 'var(--ontrack-primary)', flexShrink: 0, marginTop: '1px' }}>●</span>
+                    <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: n.read ? 400 : 600, color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-text)', background: n.read ? 'transparent' : 'var(--ontrack-primary-tint)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
+                      <span style={{ color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-primary)', flexShrink: 0, marginTop: '1px', fontSize: '14px' }}>●</span>
                       <div style={{ flex: 1 }}>
                         <div>{n.text}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginTop: '3px' }}>{relativeTime(n.createdAt)}</div>
+                        <div style={{ fontSize: '11px', color: 'var(--ontrack-text-secondary)', marginTop: '3px' }}>{relativeTime(n.createdAt)}</div>
                       </div>
                     </div>
                   ))
@@ -787,12 +820,12 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
           <div style={{ padding: '14px 10px' }}>
             {view === 'room' && currentRoom && (() => {
               const role = memberDB.role(currentRoom.id, currentUser?.id ?? '')
-              const tabs = (['flowchart','mytasks','chat','members',...(role === 'leader' ? ['settings'] : [])] as RoomTab[])
+              const tabs = (['flowchart', ...(role === 'leader' ? ['alltasks'] : []), 'mytasks','chat','members',...(role === 'leader' ? ['settings'] : [])] as RoomTab[])
               return (
               <>
                 <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ontrack-text-secondary)', textTransform: 'uppercase', letterSpacing: '0.07em', padding: '0 8px', marginBottom: '6px' }}>Navigation</div>
                 {tabs.map(t => (
-                  <SidebarBtn key={t} label={t === 'mytasks' ? 'My Tasks' : t.charAt(0).toUpperCase() + t.slice(1)} active={roomTab === t} onClick={() => setRoomTab(t)} />
+                  <SidebarBtn key={t} label={t === 'mytasks' ? 'My Tasks' : t === 'alltasks' ? 'All Tasks' : t.charAt(0).toUpperCase() + t.slice(1)} active={roomTab === t} onClick={() => setRoomTab(t)} />
                 ))}
                 <Divider />
               </>
@@ -804,8 +837,8 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
               : activeRooms.map(r => (
                 <button key={r.id} onClick={() => onRoomClick(r.id)} style={{
                   display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px 8px 11px',
-                   background: currentRoom?.id === r.id ? 'var(--ontrack-border)' : 'transparent',
-                   border: 'none', borderRadius: '5px', fontSize: '13px', color: 'var(--ontrack-text-secondary)',
+                   background: currentRoom?.id === r.id ? 'var(--ontrack-primary-tint)' : 'transparent',
+                   border: 'none', borderRadius: '5px', fontSize: '13px', color: currentRoom?.id === r.id ? 'var(--ontrack-primary)' : 'var(--ontrack-text-secondary)',
                    cursor: 'pointer', marginBottom: '2px',
                    borderLeft: `3px solid ${r.color}`,
                    fontFamily: 'Inter, sans-serif', fontWeight: currentRoom?.id === r.id ? 600 : 400,
@@ -1356,7 +1389,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       setDesc(task.description)
       setAssigneeIds(task.assigneeIds)
       setDeadline(task.deadline)
-      setDeps(taskDeps[task.id] ?? [])
+      setDeps((taskDeps[task.id] ?? []).filter(id => id !== task.id))
     }
   }, [task, taskDeps])
 
@@ -1399,7 +1432,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       x,
       y,
     }
-    onSave(data, deps)
+    onSave(data, deps.filter(id => id !== task?.id))
   }
 
   function handleDelete() {
@@ -1439,7 +1472,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
         <>
           <label style={S.label}>Dependencies (optional)</label>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
-            {existingTasks.map(t => (
+            {existingTasks.filter(t => t.id !== task?.id).map(t => (
               <button key={t.id} onClick={() => setDeps(d => d.includes(t.id) ? d.filter(x => x !== t.id) : [...d, t.id])}
                 style={{ padding: '4px 10px', borderRadius: '4px', border: '1px solid var(--ontrack-border)', fontSize: '12px', cursor: 'pointer', background: deps.includes(t.id) ? 'var(--ontrack-primary)' : 'var(--ontrack-surface)', color: deps.includes(t.id) ? '#fff' : 'var(--ontrack-text-secondary)' }}>
                 {t.title}
@@ -1541,7 +1574,7 @@ function Avatar({ name, color, size = 36 }: { name: string; color: string; size?
 
 function SidebarBtn({ label, active, onClick, dim }: { label: string; active: boolean; onClick: () => void; dim?: boolean }) {
   return (
-    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', background: active ? 'var(--ontrack-text)' : 'transparent', border: 'none', borderRadius: '5px', fontSize: '13px', color: dim ? 'var(--ontrack-text-muted)' : 'var(--ontrack-text-secondary)', cursor: 'pointer', marginBottom: '2px', fontFamily: 'Inter, sans-serif', fontWeight: active ? 600 : 400 }}>
+    <button onClick={onClick} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '8px 10px', background: active ? 'var(--ontrack-primary-tint)' : 'transparent', border: 'none', borderRadius: '5px', fontSize: '13px', color: dim ? 'var(--ontrack-text-muted)' : active ? 'var(--ontrack-primary)' : 'var(--ontrack-text-secondary)', cursor: 'pointer', marginBottom: '2px', fontFamily: 'Inter, sans-serif', fontWeight: active ? 600 : 400 }}>
       {label}
     </button>
   )

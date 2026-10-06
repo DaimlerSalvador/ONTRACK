@@ -12,22 +12,23 @@ export function getStoredTheme(): Theme {
 
 const LIGHT = {
   '--ontrack-bg': '#FFFFFF',
-  '--ontrack-surface': '#F5F7FA',
+  '--ontrack-surface': '#F2F2F2',
   '--ontrack-surface-elevated': '#FFFFFF',
-  '--ontrack-border': '#94a3b8',
-  '--ontrack-text': '#000000',
-  '--ontrack-text-secondary': '#64748B',
-  '--ontrack-text-muted': '#94A3B8',
-  '--ontrack-primary': '#2563EB',
-  '--ontrack-primary-hover': '#1D4ED8',
+  '--ontrack-border': '#D9D9D9',
+  '--ontrack-text': '#1A1A1A',
+  '--ontrack-text-secondary': '#595959',
+  '--ontrack-text-muted': '#8C8C8C',
+  '--ontrack-primary': '#C00000',
+  '--ontrack-primary-hover': '#A30000',
+  '--ontrack-primary-tint': '#FBEAEA',
   '--ontrack-success': '#16A34A',
   '--ontrack-danger': '#DC2626',
   '--ontrack-info': '#2563EB',
   '--ontrack-input-bg': '#FFFFFF',
-  '--ontrack-node-hidden-bg': '#E2E8F0',
-  '--ontrack-node-hidden-text': '#64748B',
-  '--ontrack-scrollbar-thumb': '#cbd5e1',
-  '--ontrack-scrollbar-thumb-hover': '#94a3b8',
+  '--ontrack-node-hidden-bg': '#F2F2F2',
+  '--ontrack-node-hidden-text': '#8C8C8C',
+  '--ontrack-scrollbar-thumb': '#D9D9D9',
+  '--ontrack-scrollbar-thumb-hover': '#BFBFBF',
   '--ontrack-shadow': 'rgba(0,0,0,0.05)',
 }
 
@@ -64,7 +65,7 @@ function varsToCSS(vars: Record<string, string>, selector: string): string {
 
 const LIGHT_CSS = varsToCSS(LIGHT, 'html[data-theme="light"]')
 const DARK_CSS = varsToCSS(DARK, 'html[data-theme="dark"]')
-const ROOT_CSS = varsToCSS({ ...LIGHT, '--ontrack-bg': '#f4f4f5', '--ontrack-surface': '#ffffff' }, ':root')
+const ROOT_CSS = varsToCSS({ ...LIGHT, '--ontrack-bg': '#FFFFFF', '--ontrack-surface': '#F2F2F2' }, ':root')
 
 export function applyTheme(target: Theme): void {
   const html = document.documentElement
