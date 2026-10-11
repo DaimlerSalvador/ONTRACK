@@ -680,7 +680,7 @@ export default function App() {
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, flex: 1, paddingRight: '12px' }}>{mTaskDetail.title}</h3>
                   <StatusBadge status={mTaskDetail.status} />
                 </div>
-                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
+                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '10px 14px' }}>{mTaskDetail.description}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                   <InfoBox label="Assignees" value={mTaskDetail.assigneeIds.length ? mTaskDetail.assigneeIds.map(id => getUserName(id)).join(', ') : 'Unassigned'} />
                   <InfoBox label="Deadline" value={mTaskDetail.deadline} />
@@ -1619,7 +1619,7 @@ function DropItem({ label, onClick, danger }: { label: string; onClick: () => vo
 
 function InfoBox({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div style={{ background: 'var(--ontrack-input-bg)', borderRadius: '6px', padding: '12px', marginBottom: '8px' }}>
+    <div style={{ background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '12px', marginBottom: '8px' }}>
       <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '4px' }}>{label}</div>
       <div style={{ fontSize: '14px', color: 'var(--ontrack-text)', fontWeight: 500 }}>{value}</div>
     </div>
@@ -1627,7 +1627,7 @@ function InfoBox({ label, value }: { label: string; value: React.ReactNode }) {
 }
 
 function Divider() {
-  return <div style={{ height: '1px', background: 'var(--ontrack-text)', margin: '10px 8px' }} />
+  return <div style={{ height: '1px', background: 'var(--ontrack-border)', margin: '10px 8px' }} />
 }
 
 function Empty({ text }: { text: string }) {
