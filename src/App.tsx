@@ -470,8 +470,26 @@ export default function App() {
                 <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <button style={{ ...S.ghost, fontSize: '12px', padding: '6px 12px' }} onClick={() => { unarchiveRoom(r.id) }}>Unarchive</button>
                   <button style={{ ...S.danger, fontSize: '12px', padding: '6px 12px' }} onClick={() => { if (confirm(`Delete "${r.title}"? This cannot be undone.`)) deleteRoom(r.id) }}>Delete</button>
-                </div>
-              </div>
+</div>
+        {showInfo && (
+          <div style={{ marginTop: '40px', maxWidth: '760px', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '12px', padding: '32px', textAlign: 'left' }}>
+            <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '6px' }}>Plan it. Track it. Finish it.</h2>
+            <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>OnTrack is a web-based task and deadline monitoring system for student groups. Turn your capstone, thesis, or group project into a visual flowchart so everyone can see what needs to be done first, who is responsible, and what is already finished.</p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '28px' }}>
+              <div style={{ padding: '14px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px' }}><div style={{ fontWeight: 700, color: 'var(--ontrack-primary)', marginBottom: '4px' }}>1</div><div style={{ fontWeight: 600, marginBottom: '2px' }}>Create or join a room</div><div style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>A leader creates a room and shares the join code.</div></div>
+              <div style={{ padding: '14px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px' }}><div style={{ fontWeight: 700, color: 'var(--ontrack-primary)', marginBottom: '4px' }}>2</div><div style={{ fontWeight: 600, marginBottom: '2px' }}>Build the flowchart</div><div style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Leader adds tasks, deadlines, assignees, and dependencies.</div></div>
+              <div style={{ padding: '14px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px' }}><div style={{ fontWeight: 700, color: 'var(--ontrack-primary)', marginBottom: '4px' }}>3</div><div style={{ fontWeight: 600, marginBottom: '2px' }}>Start &amp; submit</div><div style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Members click Start, then submit a link to finished work.</div></div>
+              <div style={{ padding: '14px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px' }}><div style={{ fontWeight: 700, color: 'var(--ontrack-primary)', marginBottom: '4px' }}>4</div><div style={{ fontWeight: 600, marginBottom: '2px' }}>Review &amp; approve</div><div style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Leader approves or requests a revision.</div></div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ padding: '16px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px', borderLeft: '3px solid var(--ontrack-primary)' }}><div style={{ fontWeight: 700, marginBottom: '8px' }}>Leader</div><ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.7 }}><li>Create and manage project rooms</li><li>Build the flowchart and assign tasks</li><li>Review submissions: approve or request revision</li><li>Remove members, archive, or delete the room</li></ul></div>
+              <div style={{ padding: '16px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px', borderLeft: '3px solid var(--ontrack-border)' }}><div style={{ fontWeight: 700, marginBottom: '8px' }}>Member</div><ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.7 }}><li>Join rooms using a code</li><li>View the full flowchart and everyone's tasks</li><li>Start and submit your assigned tasks</li><li>Chat with your team and receive notifications</li></ul></div>
+            </div>
+            <div style={{ marginBottom: '20px' }}><div style={{ fontWeight: 700, marginBottom: '12px' }}>Understanding Task Status</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>{(['not-started','in-progress','submitted','revision','done'] as TaskStatus[]).map(s => <div key={s} style={{ padding: '8px', background: 'var(--ontrack-surface-elevated)', borderRadius: '6px', textAlign: 'center' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: STATUS[s].nodeColor, border: `1px solid ${STATUS[s].nodeBorder}`, margin: '0 auto 4px' }}></div><div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--ontrack-text)' }}>{STATUS[s].label}</div></div>)}</div></div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}><button onClick={onRegister} style={{ ...S.red, fontSize: '15px', padding: '13px 36px' }}>Get Started</button><button onClick={onLogin} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>Log in</button></div>
+          </div>
+        )}
+      </div>
             ))
           }
         </div>
@@ -864,6 +882,7 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
 // ─── Landing page ──────────────────────────────────────────────────────────────
 
 function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister: () => void }) {
+  const [showInfo, setShowInfo] = useState(false)
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
@@ -888,6 +907,7 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
         <p style={{ fontSize: '16px', color: 'var(--text-secondary)', maxWidth: '380px', lineHeight: 1.7, marginBottom: '40px' }}>Track tasks. Visualize progress. Hit every deadline.</p>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '15px', padding: '13px 36px' }}>Get Started</button>
+          <button onClick={() => setShowInfo(v => !v)} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>{showInfo ? 'Hide Info' : 'Learn about OnTrack'}</button>
           <button onClick={onLogin} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>Log in</button>
         </div>
         <div style={{ marginTop: '70px', display: 'flex', gap: '40px', color: 'var(--text-muted)', fontSize: '13px', flexWrap: 'wrap', justifyContent: 'center' }}>
@@ -1613,6 +1633,9 @@ function Divider() {
 function Empty({ text }: { text: string }) {
   return <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--ontrack-text-muted)', fontSize: '14px' }}>{text}</div>
 }
+
+
+
 
 
 
