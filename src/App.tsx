@@ -957,16 +957,18 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   }
 
   return (
-    <div data-auth="true" style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
+    <div data-auth="true" style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.5 }} preserveAspectRatio="none">
         <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-10,400,450)" />
         <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
+      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)' }}>
         <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
-      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', position: 'relative', zIndex: 10 }}>
-        <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '380px' }}>
+      <div style={{ flex: 1, display: 'flex', position: 'relative', zIndex: 10 }}>
+        {/* Left — form */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '420px' }}>
           <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: 'var(--ontrack-text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
           <p style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
           {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
@@ -1063,6 +1065,42 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           </p>
         </div>
       </div>
+      {/* Right — value panel */}
+      <div style={{ width: '420px', flexShrink: 0, background: 'var(--ontrack-surface)', borderLeft: '1px solid var(--ontrack-border)', padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--ontrack-primary)', marginBottom: '14px' }}>ONTRACK</div>
+        <h2 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--ontrack-text)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '10px' }}>Plan it.<br />Track it.<br />Finish it.</h2>
+        <p style={{ fontSize: '14px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.6, marginBottom: '28px' }}>Organize your group project as a visual flowchart, assign tasks, and stay on top of every deadline.</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '32px' }}>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>1</span>
+            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>See who's doing what</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Every task has an owner and a deadline, visible to the whole team.</div></div>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>2</span>
+            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Know what to do first</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>The flowchart shows task order, so nobody is guessing what comes next.</div></div>
+          </div>
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>3</span>
+            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Get deadline reminders</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>In-app alerts for due dates, new tasks, and review updates.</div></div>
+          </div>
+        </div>
+        <div style={{ background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '20px' }}>
+          <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mini Flowchart</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+            <div style={{ background: 'var(--ontrack-success)', color: '#fff', padding: '8px 14px', borderRadius: '6px 0 0 6px', fontSize: '13px', fontWeight: 600 }}>Setup</div>
+            <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
+            <div style={{ background: 'var(--ontrack-primary)', color: '#fff', padding: '8px 14px', fontSize: '13px', fontWeight: 600 }}>Build</div>
+            <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
+            <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', color: 'var(--ontrack-text-secondary)', padding: '8px 14px', borderRadius: '0 6px 6px 0', fontSize: '13px', fontWeight: 600 }}>Test</div>
+          </div>
+          <div style={{ display: 'flex', gap: '14px', marginTop: '12px', fontSize: '11px', color: 'var(--ontrack-text-secondary)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-success)' }}></span>Done</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-primary)' }}></span>In Progress</span>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)' }}></span>Not Started</span>
+          </div>
+        </div>
+      </div>
+    </div>
     </div>
   )
 }
@@ -1371,7 +1409,6 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{title}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
         </div>
-        {children}
       </div>
     </div>
   )
@@ -1641,6 +1678,7 @@ function Divider() {
 function Empty({ text }: { text: string }) {
   return <div style={{ padding: '40px 0', textAlign: 'center', color: 'var(--ontrack-text-muted)', fontSize: '14px' }}>{text}</div>
 }
+
 
 
 
