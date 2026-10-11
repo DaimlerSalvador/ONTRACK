@@ -161,8 +161,8 @@ export default function App() {
     setView('home')
   }
 
-  function handleRegister(name: string, email: string, password: string) {
-    const result = userDB.register(name, email, password)
+  function handleRegister(firstName: string, lastName: string, email: string, password: string) {
+    const result = userDB.register(`${firstName} ${lastName}`, email, password)
     if (typeof result === 'string') { setAuthError(result); return }
     writeRow('users', result)
     setCurrentUser(result)
@@ -902,10 +902,11 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
 
 // ─── Auth page ─────────────────────────────────────────────────────────────────
 
-type AuthSubmit = ((email: string, password: string) => void) | ((name: string, email: string, password: string) => void)
+type AuthSubmit = ((email: string, password: string) => void) | ((firstName: string, lastName: string, email: string, password: string) => void)
 
 function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' | 'register'; error: string; onSubmit: AuthSubmit; onSwitch: () => void; onBack: () => void }) {
-  const [name, setName] = useState('')
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -922,7 +923,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
         alert('You must agree to the Terms and Agreement to create an account.')
         return
       }
-      (onSubmit as (n: string, e: string, p: string) => void)(name, email, password)
+      (onSubmit as (f: string, l: string, e: string, p: string) => void)(firstName, lastName, email, password)
     }
   }
 
@@ -941,9 +942,15 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           <p style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
           {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
           {!isLogin && (
-            <div>
-              <label style={S.label}>Full Name</label>
-              <input style={S.input} value={name} onChange={e => setName(e.target.value)} placeholder="Your full name" />
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={S.label}>First Name</label>
+                <input style={S.input} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" autoFocus />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={S.label}>Last Name</label>
+                <input style={S.input} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" />
+              </div>
             </div>
           )}
           <label style={S.label}>Email</label>
@@ -1020,7 +1027,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           )}
           {isLogin && <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '14px' }}><span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)', cursor: 'pointer' }}>Forgot password?</span></div>}
           <button onClick={handleSubmit} style={{ ...S.red, width: '100%', padding: '12px', fontSize: '14px' }}>{isLogin ? 'Log in' : 'Register'}</button>
-          {!isLogin && <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginTop: '12px' }}>Demo: log in as <strong style={{ color: 'var(--ontrack-text-muted)' }}>alex@uni.edu</strong> / <strong style={{ color: 'var(--ontrack-text-muted)' }}>password</strong></p>}
+          {!isLogin && <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginTop: '12px' }}></p>}
           <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <span onClick={onSwitch} style={{ color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 500 }}>{isLogin ? 'Register' : 'Log in'}</span>
