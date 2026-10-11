@@ -866,39 +866,39 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
 function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister: () => void }) {
   const [showInfo, setShowInfo] = useState(false)
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }} preserveAspectRatio="none">
         <ellipse cx="25%" cy="55%" rx="48%" ry="38%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-12,400,400)" />
-        <ellipse cx="72%" cy="35%" rx="38%" ry="30%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(8,700,300)" />
-        <ellipse cx="55%" cy="75%" rx="55%" ry="22%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-3,600,500)" />
+        <ellipse cx="72%" cy="35%" rx="38%" ry="30%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(8,700,300)" />
+        <ellipse cx="55%" cy="75%" rx="55%" ry="22%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(-3,600,500)" />
         <ellipse cx="80%" cy="62%" rx="28%" ry="42%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(18,800,500)" />
-        <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="var(--surface)" strokeWidth="1" transform="rotate(-25,200,200)" />
+        <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(-25,200,200)" />
       </svg>
       <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--text)' }}>ONTRACK</span>
+        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)' }}>ONTRACK</span>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <button onClick={onLogin} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
+          <button onClick={onLogin} style={{ background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '13px' }}>Register Now</button>
         </div>
       </nav>
       <div style={{ position: 'relative', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 'calc(100vh - 58px)', textAlign: 'center', padding: '0 24px' }}>
-        <div style={{ fontSize: '11px', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: 'var(--text-muted)', marginBottom: '24px' }}>STUDENT PROJECT MANAGEMENT</div>
-        <h1 style={{ fontSize: 'clamp(36px, 7vw, 72px)', fontWeight: 800, color: 'var(--text)', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: '22px' }}>
-          WELCOME TO <span style={{ color: 'var(--accent)' }}>ONTRACK</span>
+        <div style={{ fontSize: '11px', fontFamily: "'DM Mono', monospace", letterSpacing: '0.2em', color: 'var(--ontrack-text-muted)', marginBottom: '24px' }}>STUDENT PROJECT MANAGEMENT</div>
+        <h1 style={{ fontSize: 'clamp(36px, 7vw, 72px)', fontWeight: 800, color: 'var(--ontrack-text)', letterSpacing: '-0.03em', lineHeight: 1.05, marginBottom: '22px' }}>
+          WELCOME TO <span style={{ color: 'var(--ontrack-primary)' }}>ONTRACK</span>
         </h1>
-        <p style={{ fontSize: '16px', color: 'var(--text-secondary)', maxWidth: '380px', lineHeight: 1.7, marginBottom: '40px' }}>Track tasks. Visualize progress. Hit every deadline.</p>
+        <p style={{ fontSize: '16px', color: 'var(--ontrack-text-secondary)', maxWidth: '380px', lineHeight: 1.7, marginBottom: '40px' }}>Track tasks. Visualize progress. Hit every deadline.</p>
         <div style={{ display: 'flex', gap: '12px' }}>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '15px', padding: '13px 36px' }}>Get Started</button>
-          <button onClick={() => setShowInfo(v => !v)} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>{showInfo ? 'Hide Info' : 'Learn about OnTrack'}</button>
           <button onClick={onLogin} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>Log in</button>
         </div>
-        <div style={{ marginTop: '70px', display: 'flex', gap: '40px', color: 'var(--text-muted)', fontSize: '13px', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ marginTop: '70px', display: 'flex', gap: '40px', color: 'var(--ontrack-text-muted)', fontSize: '13px', flexWrap: 'wrap', justifyContent: 'center' }}>
           {['Flowchart Visualization','Role-Based Access','Real-Time Tracking','Group Chat'].map(f => (
-            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: 'var(--accent)' }}>✓</span>{f}</span>
+            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ color: 'var(--ontrack-primary)' }}>✓</span>{f}</span>
           ))}
         </div>
+        <button onClick={() => setShowInfo(v => !v)} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px', marginTop: '30px' }}>{showInfo ? 'Hide Info' : 'Learn about OnTrack'}</button>
         {showInfo && (
-          <div style={{ marginTop: '40px', maxWidth: '760px', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '12px', padding: '32px', textAlign: 'left' }}>
+          <div style={{ marginTop: '40px', maxWidth: '760px', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '12px', padding: '32px', textAlign: 'left', boxShadow: '0 4px 24px rgba(0,0,0,0.06)' }}>
             <h2 style={{ fontSize: '22px', fontWeight: 800, marginBottom: '6px' }}>Plan it. Track it. Finish it.</h2>
             <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '24px' }}>OnTrack is a web-based task and deadline monitoring system for student groups. Turn your capstone, thesis, or group project into a visual flowchart so everyone can see what needs to be done first, who is responsible, and what is already finished.</p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '28px' }}>
@@ -912,7 +912,7 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
               <div style={{ padding: '16px', background: 'var(--ontrack-surface-elevated)', borderRadius: '8px', borderLeft: '3px solid var(--ontrack-border)' }}><div style={{ fontWeight: 700, marginBottom: '8px' }}>Member</div><ul style={{ margin: 0, paddingLeft: '18px', fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.7 }}><li>Join rooms using a code</li><li>View the full flowchart and everyone's tasks</li><li>Start and submit your assigned tasks</li><li>Chat with your team and receive notifications</li></ul></div>
             </div>
             <div style={{ marginBottom: '20px' }}><div style={{ fontWeight: 700, marginBottom: '12px' }}>Understanding Task Status</div><div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px' }}>{(['not-started','in-progress','submitted','revision','done'] as TaskStatus[]).map(s => <div key={s} style={{ padding: '8px', background: 'var(--ontrack-surface-elevated)', borderRadius: '6px', textAlign: 'center' }}><div style={{ width: '10px', height: '10px', borderRadius: '50%', background: STATUS[s].nodeColor, border: `1px solid ${STATUS[s].nodeBorder}`, margin: '0 auto 4px' }}></div><div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--ontrack-text)' }}>{STATUS[s].label}</div></div>)}</div></div>
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}><button onClick={onRegister} style={{ ...S.red, fontSize: '15px', padding: '13px 36px' }}>Get Started</button><button onClick={onLogin} style={{ ...S.ghost, fontSize: '15px', padding: '13px 36px' }}>Log in</button></div>
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}></div>
           </div>
         )}
       </div>
