@@ -675,9 +675,8 @@ export default function App() {
 
             {/* ── Task Detail Modal ── */}
             {mTaskDetail && (
-              <Modal title="Task Details" onClose={() => setMTaskDetail(null)}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
-                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, flex: 1, paddingRight: '12px' }}>{mTaskDetail.title}</h3>
+              <Modal title={mTaskDetail.title} onClose={() => setMTaskDetail(null)}>
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
                   <StatusBadge status={mTaskDetail.status} />
                 </div>
                 <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
