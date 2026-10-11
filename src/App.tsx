@@ -940,7 +940,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
-  const [showFullTerms, setShowFullTerms] = useState(false)
+  const [showTermsModal, setShowTermsModal] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const isLogin = mode === 'login'
@@ -957,21 +957,56 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
   }
 
   return (
-    <div data-auth="true" style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex' }}>
+    <div data-auth="true" style={{ minHeight: '100vh', background: 'var(--ontrack-bg)', position: 'relative', overflow: 'hidden', fontFamily: 'Inter, sans-serif', display: 'flex', flexDirection: 'column' }}>
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0.5 }} preserveAspectRatio="none">
         <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-10,400,450)" />
         <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)' }}>
+      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)', flexShrink: 0 }}>
         <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
-      <div style={{ flex: 1, display: 'flex', position: 'relative', zIndex: 10 }}>
-        {/* Left — form */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '40px 20px', overflowY: 'auto' }}>
-          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '40px', width: '100%', maxWidth: '420px' }}>
-          <h2 style={{ fontSize: '22px', fontWeight: 700, marginBottom: '6px', textAlign: 'center', color: 'var(--ontrack-text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
-          <p style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
-          {error && <div style={{ background: '#2a1515', border: '1px solid #5a2020', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
+      <div style={{ flex: 1, display: 'flex', position: 'relative', zIndex: 10, paddingLeft: 0, marginTop: 0 }}>
+        {/* Left — value panel */}
+        <div style={{ width: '480px', flexShrink: 0, background: 'var(--ontrack-surface)', borderRight: '1px solid var(--ontrack-border)', padding: '56px 44px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--ontrack-primary)', marginBottom: '14px' }}>ONTRACK</div>
+          <h2 style={{ fontSize: '30px', fontWeight: 800, color: 'var(--ontrack-text)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '12px' }}>Plan it.<br />Track it.<br />Finish it.</h2>
+          <p style={{ fontSize: '14px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.6, marginBottom: '28px' }}>Organize your group project as a visual flowchart, assign tasks, and stay on top of every deadline.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '32px' }}>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: '#fff', fontWeight: 700 }}>1</span>
+              <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>See who's doing what</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Every task has an owner and a deadline, visible to the whole team.</div></div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: '#fff', fontWeight: 700 }}>2</span>
+              <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Know what to do first</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>The flowchart shows task order, so nobody is guessing what comes next.</div></div>
+            </div>
+            <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+              <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: '#fff', fontWeight: 700 }}>3</span>
+              <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Get deadline reminders</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>In-app alerts for due dates, new tasks, and review updates.</div></div>
+            </div>
+          </div>
+          <div style={{ background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '20px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mini Flowchart</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+              <div style={{ background: 'var(--ontrack-success)', color: '#fff', padding: '8px 14px', borderRadius: '6px 0 0 6px', fontSize: '13px', fontWeight: 600 }}>Setup</div>
+              <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
+              <div style={{ background: 'var(--ontrack-yellow)', color: '#1a1a1a', padding: '8px 14px', fontSize: '13px', fontWeight: 600 }}>Build</div>
+              <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
+              <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', color: 'var(--ontrack-text-secondary)', padding: '8px 14px', borderRadius: '0 6px 6px 0', fontSize: '13px', fontWeight: 600 }}>Test</div>
+            </div>
+            <div style={{ display: 'flex', gap: '14px', marginTop: '12px', fontSize: '11px', color: 'var(--ontrack-text-secondary)' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-success)' }}></span>Done</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-yellow)' }}></span>In Progress</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)' }}></span>Not Started</span>
+            </div>
+          </div>
+        </div>
+        {/* Right — form */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflowY: 'auto' }}>
+          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '48px', width: '480px', boxSizing: 'border-box', marginLeft: '-40px' }}>
+          <h2 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '8px', textAlign: 'center', color: 'var(--ontrack-text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
+          <p style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
+          {error && <div style={{ background: 'var(--ontrack-primary-tint)', border: '1px solid var(--ontrack-primary)', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
           {!isLogin && (
             <div style={{ display: 'flex', gap: '12px' }}>
               <div style={{ flex: 1 }}>
@@ -987,7 +1022,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           <label style={S.label}>Email</label>
           <input style={S.input} type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@university.edu" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
           <label style={S.label}>Password</label>
-          <div style={{ position: 'relative', marginBottom: '14px' }}>
+          <div style={{ position: 'relative', marginBottom: '4px' }}>
             <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showPassword ? "text" : "password"} value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && handleSubmit()} />
             <button type="button" onClick={() => setShowPassword(!showPassword)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               {showPassword ? (
@@ -997,6 +1032,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               )}
             </button>
           </div>
+          <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginTop: '-2px', marginBottom: '14px' }}>At least 6 characters</p>
           {!isLogin && (
             <div>
               <label style={S.label}>Confirm Password</label>
@@ -1012,96 +1048,42 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               </div>
             </div>
           )}
+          {showTermsModal && (
+            <Modal title="Terms and Agreement" onClose={() => setShowTermsModal(false)}>
+              <div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.7, maxHeight: '60vh', overflowY: 'auto' }}>
+                <p style={{ marginBottom: '12px' }}><strong>1. Purpose of the System</strong><br />OnTrack is a task and deadline monitoring system developed as a capstone project for academic use by student groups at Bataan Peninsula State University. It is intended to help manage capstone, thesis, and other collaborative group projects.</p>
+                <p style={{ marginBottom: '12px' }}><strong>2. Account Responsibility</strong><br />You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. You agree to provide accurate and truthful information during registration.</p>
+                <p style={{ marginBottom: '12px' }}><strong>3. Acceptable Use</strong><br />You agree to use OnTrack only for legitimate academic project management purposes. You will not use the system to post harmful, offensive, or misleading content in project rooms, task descriptions, or group chat.</p>
+                <p style={{ marginBottom: '12px' }}><strong>4. Content and Submissions</strong><br />Any task submissions made through OnTrack are done via links to externally hosted content (e.g., Google Drive, GitHub, Figma). You are responsible for ensuring that content you link to is accessible to your project room's members and does not violate any third-party rights.</p>
+                <p style={{ marginBottom: '12px' }}><strong>5. Data Usage</strong><br />Information you provide (name, email, project data, messages) will be used solely to operate the OnTrack system for its intended academic purpose. As a student capstone project, OnTrack does not sell or share your data with third parties.</p>
+                <p style={{ marginBottom: '12px' }}><strong>6. Room Leadership and Access</strong><br />Project leaders have administrative control over their rooms, including the ability to assign tasks, review submissions, remove members, and archive or delete rooms. Members acknowledge that leaders may take these actions as part of normal project management.</p>
+                <p style={{ marginBottom: '12px' }}><strong>7. Availability</strong><br />OnTrack is provided as an academic prototype/capstone system. It is provided "as is," and the developers do not guarantee uninterrupted availability or data retention beyond the scope of the course/project period.</p>
+                <p style={{ marginBottom: '12px' }}><strong>8. Changes to Terms</strong><br />These terms may be updated as the system evolves during development. Continued use of OnTrack after changes constitutes acceptance of the updated terms.</p>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '16px' }}>
+                <button onClick={() => setShowTermsModal(false)} style={{ ...S.red, padding: '8px 20px', fontSize: '13px' }}>Close</button>
+              </div>
+            </Modal>
+          )}
           {!isLogin && (
-            <div style={{ marginBottom: '16px' }}>
-              <div style={{ background: 'var(--ontrack-bg)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '14px', fontSize: '12px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.6, maxHeight: showFullTerms ? 'none' : '120px', overflow: 'hidden' }}>
-                <strong style={{ color: 'var(--ontrack-text-muted)' }}>OnTrack Terms and Agreement</strong>
-                <br /><br />
-                <strong>1. Purpose of the System</strong><br />
-                OnTrack is a task and deadline monitoring system developed as a capstone project for academic use by student groups at Bataan Peninsula State University. It is intended to help manage capstone, thesis, and other collaborative group projects.
-                <br /><br />
-                <strong>2. Account Responsibility</strong><br />
-                You are responsible for maintaining the confidentiality of your login credentials and for all activity that occurs under your account. You agree to provide accurate and truthful information during registration.
-                <br /><br />
-                <strong>3. Acceptable Use</strong><br />
-                You agree to use OnTrack only for legitimate academic project management purposes. You will not use the system to post harmful, offensive, or misleading content in project rooms, task descriptions, or group chat.
-                {showFullTerms && (
-                  <>
-                    <br /><br />
-                    <strong>4. Content and Submissions</strong><br />
-                    Any task submissions made through OnTrack are done via links to externally hosted content (e.g., Google Drive, GitHub, Figma). You are responsible for ensuring that content you link to is accessible to your project room's members and does not violate any third-party rights.
-                    <br /><br />
-                    <strong>5. Data Usage</strong><br />
-                    Information you provide (name, email, project data, messages) will be used solely to operate the OnTrack system for its intended academic purpose. As a student capstone project, OnTrack does not sell or share your data with third parties.
-                    <br /><br />
-                    <strong>6. Room Leadership and Access</strong><br />
-                    Project leaders have administrative control over their rooms, including the ability to assign tasks, review submissions, remove members, and archive or delete rooms. Members acknowledge that leaders may take these actions as part of normal project management.
-                    <br /><br />
-                    <strong>7. Availability</strong><br />
-                    OnTrack is provided as an academic prototype/capstone system. It is provided "as is," and the developers do not guarantee uninterrupted availability or data retention beyond the scope of the course/project period.
-                    <br /><br />
-                    <strong>8. Changes to Terms</strong><br />
-                    These terms may be updated as the system evolves during development. Continued use of OnTrack after changes constitutes acceptance of the updated terms.
-                  </>
-                )}
-              </div>
-              <div style={{ textAlign: 'right', marginTop: '6px' }}>
-                <span onClick={() => setShowFullTerms(v => !v)} style={{ fontSize: '11px', color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 500 }}>
-                  {showFullTerms ? 'Show less' : 'Read more'}
-                </span>
-              </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '10px', cursor: 'pointer' }}>
-                <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} />
-                <span style={{ fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>I agree to the Terms and Agreement</span>
-              </label>
-            </div>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', cursor: 'pointer' }}>
+              <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--ontrack-primary)' }} />
+              <span style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)' }}>I agree to the{' '}
+                <span onClick={() => setShowTermsModal(true)} style={{ color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 600 }}>Terms and Agreement</span>
+              </span>
+            </label>
           )}
           {isLogin && <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '14px' }}><span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)', cursor: 'pointer' }}>Forgot password?</span></div>}
           <button onClick={handleSubmit} style={{ ...S.red, width: '100%', padding: '12px', fontSize: '14px' }}>{isLogin ? 'Log in' : 'Register'}</button>
           {!isLogin && <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginTop: '12px' }}></p>}
-          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>
+          <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--ontrack-text-secondary)' }}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
             <span onClick={onSwitch} style={{ color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 500 }}>{isLogin ? 'Register' : 'Log in'}</span>
           </p>
         </div>
       </div>
-      {/* Right — value panel */}
-      <div style={{ width: '420px', flexShrink: 0, background: 'var(--ontrack-surface)', borderLeft: '1px solid var(--ontrack-border)', padding: '48px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-        <div style={{ fontFamily: "'DM Mono', monospace", fontSize: '13px', fontWeight: 700, letterSpacing: '0.2em', color: 'var(--ontrack-primary)', marginBottom: '14px' }}>ONTRACK</div>
-        <h2 style={{ fontSize: '26px', fontWeight: 800, color: 'var(--ontrack-text)', letterSpacing: '-0.02em', lineHeight: 1.15, marginBottom: '10px' }}>Plan it.<br />Track it.<br />Finish it.</h2>
-        <p style={{ fontSize: '14px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.6, marginBottom: '28px' }}>Organize your group project as a visual flowchart, assign tasks, and stay on top of every deadline.</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginBottom: '32px' }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>1</span>
-            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>See who's doing what</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>Every task has an owner and a deadline, visible to the whole team.</div></div>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>2</span>
-            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Know what to do first</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>The flowchart shows task order, so nobody is guessing what comes next.</div></div>
-          </div>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-            <span style={{ width: '22px', height: '22px', borderRadius: '50%', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: '12px', color: 'var(--ontrack-text-secondary)' }}>3</span>
-            <div><div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--ontrack-text)', marginBottom: '2px' }}>Get deadline reminders</div><div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.5 }}>In-app alerts for due dates, new tasks, and review updates.</div></div>
-          </div>
-        </div>
-        <div style={{ background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '20px' }}>
-          <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginBottom: '14px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Mini Flowchart</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
-            <div style={{ background: 'var(--ontrack-success)', color: '#fff', padding: '8px 14px', borderRadius: '6px 0 0 6px', fontSize: '13px', fontWeight: 600 }}>Setup</div>
-            <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
-            <div style={{ background: 'var(--ontrack-primary)', color: '#fff', padding: '8px 14px', fontSize: '13px', fontWeight: 600 }}>Build</div>
-            <div style={{ width: '18px', height: '0', borderLeft: '2px dashed var(--ontrack-border)' }}></div>
-            <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', color: 'var(--ontrack-text-secondary)', padding: '8px 14px', borderRadius: '0 6px 6px 0', fontSize: '13px', fontWeight: 600 }}>Test</div>
-          </div>
-          <div style={{ display: 'flex', gap: '14px', marginTop: '12px', fontSize: '11px', color: 'var(--ontrack-text-secondary)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-success)' }}></span>Done</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-primary)' }}></span>In Progress</span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}><span style={{ width: '8px', height: '8px', borderRadius: '50%', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)' }}></span>Not Started</span>
-          </div>
-        </div>
-      </div>
     </div>
-    </div>
+  </div>
   )
 }
 
@@ -1409,6 +1391,7 @@ function Modal({ title, onClose, children }: { title: string; onClose: () => voi
           <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{title}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
         </div>
+        {children}
       </div>
     </div>
   )

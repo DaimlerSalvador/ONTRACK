@@ -22,6 +22,9 @@ const LIGHT = {
   '--ontrack-primary': '#C00000',
   '--ontrack-primary-hover': '#A30000',
   '--ontrack-primary-tint': '#FBEAEA',
+  '--ontrack-amber': '#D97706',
+  '--ontrack-amber-hover': '#B45309',
+  '--ontrack-yellow': '#FBBF24',
   '--ontrack-success': '#16A34A',
   '--ontrack-danger': '#DC2626',
   '--ontrack-info': '#2563EB',
@@ -45,6 +48,9 @@ const DARK = {
   '--ontrack-text-muted': '#666666',
   '--ontrack-primary': '#e84040',
   '--ontrack-primary-hover': '#dc2626',
+  '--ontrack-amber': '#f59e0b',
+  '--ontrack-amber-hover': '#d97706',
+  '--ontrack-yellow': '#fbbf24',
   '--ontrack-success': '#22c55e',
   '--ontrack-danger': '#dc2626',
   '--ontrack-info': '#2563eb',
@@ -67,7 +73,6 @@ function varsToCSS(vars: Record<string, string>, selector: string): string {
 
 const LIGHT_CSS = varsToCSS(LIGHT, 'html[data-theme="light"]')
 const DARK_CSS = varsToCSS(DARK, 'html[data-theme="dark"]')
-const ROOT_CSS = varsToCSS({ ...LIGHT, '--ontrack-bg': '#FFFFFF', '--ontrack-surface': '#F2F2F2' }, ':root')
 
 export function applyTheme(target: Theme): void {
   const html = document.documentElement
@@ -80,7 +85,7 @@ export function applyTheme(target: Theme): void {
     styleEl.id = 'ontrack-theme-vars'
     document.head.appendChild(styleEl)
   }
-  styleEl.textContent = `${ROOT_CSS}\n${LIGHT_CSS}\n${DARK_CSS}`
+  styleEl.textContent = `${LIGHT_CSS}\n${DARK_CSS}`
 }
 
 export function stopThemeObserver(): void {
