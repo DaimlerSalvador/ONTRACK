@@ -675,8 +675,9 @@ export default function App() {
 
             {/* ── Task Detail Modal ── */}
             {mTaskDetail && (
-              <Modal title={mTaskDetail.title} onClose={() => setMTaskDetail(null)}>
-                <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
+              <Modal title="Task Details" onClose={() => setMTaskDetail(null)}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '16px' }}>
+                  <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, flex: 1, paddingRight: '12px' }}>{mTaskDetail.title}</h3>
                   <StatusBadge status={mTaskDetail.status} />
                 </div>
                 <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
@@ -1474,12 +1475,11 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
 
   return (
     <Modal title={isEditing ? 'Edit Task' : 'Add Task'} onClose={onClose}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '22px' }}>
-        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700 }}>{isEditing ? 'Edit Task' : 'Add Task'}</h3>
-        {isEditing && (
+      {isEditing && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '22px' }}>
           <button onClick={handleDelete} style={{ background: 'none', border: 'none', color: 'var(--ontrack-primary)', fontSize: '12px', cursor: 'pointer', fontWeight: 600 }}>Delete</button>
-        )}
-      </div>
+        </div>
+      )}
       <label style={S.label}>Task Title</label>
       <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} placeholder="e.g. Backend API Setup" autoFocus />
       <label style={S.label}>Description</label>
