@@ -680,7 +680,7 @@ export default function App() {
                   <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 700, flex: 1, paddingRight: '12px' }}>{mTaskDetail.title}</h3>
                   <StatusBadge status={mTaskDetail.status} />
                 </div>
-                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px', background: 'var(--ontrack-surface-alt)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '10px 14px' }}>{mTaskDetail.description}</p>
+                <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', lineHeight: 1.6, marginBottom: '18px' }}>{mTaskDetail.description}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
                   <InfoBox label="Assignees" value={mTaskDetail.assigneeIds.length ? mTaskDetail.assigneeIds.map(id => getUserName(id)).join(', ') : 'Unassigned'} />
                   <InfoBox label="Deadline" value={mTaskDetail.deadline} />
@@ -690,23 +690,25 @@ export default function App() {
                     <InfoBox label="Submission Link" value={<a href={mTaskDetail.submissionLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ontrack-info)', fontSize: '13px', wordBreak: 'break-all' }}>{mTaskDetail.submissionLink}</a>} />
                   </div>
                 )}
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
-                  {myRole === 'leader' && mTaskDetail.status === 'submitted' && (
-                    <>
-                      <button style={{ ...S.red, flex: 1 }} onClick={() => approveTask(mTaskDetail.id)}>✓ Approve</button>
-                      <button style={{ ...S.danger, flex: 1 }} onClick={() => requestRevision(mTaskDetail.id)}>↩ Request Revision</button>
-                    </>
-                  )}
-                  {mTaskDetail.assigneeIds.includes(currentUser.id) && mTaskDetail.status === 'not-started' && (
-                    <button style={{ ...S.red, flex: 1 }} onClick={() => startTask(mTaskDetail.id)}>Start Task</button>
-                  )}
-                  {mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late') && (
-                    <button style={{ ...S.red, flex: 1 }} onClick={() => { setMTaskDetail(null); setMSubmitTask(mTaskDetail) }}>Submit Task</button>
-                  )}
-                  {myRole === 'leader' && mTaskDetail.status !== 'submitted' && mTaskDetail.status !== 'done' && (
-                    <button style={{ ...S.ghost, fontSize: '12px', padding: '7px 12px' }} onClick={() => { setEditingTask(mTaskDetail); setMTaskDetail(null) }}>Edit Task</button>
-                  )}
-                </div>
+                {((myRole === 'leader' && mTaskDetail.status === 'submitted') || (mTaskDetail.assigneeIds.includes(currentUser.id) && mTaskDetail.status === 'not-started') || (mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late')) || (myRole === 'leader' && mTaskDetail.status !== 'submitted' && mTaskDetail.status !== 'done')) ? (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
+                    {myRole === 'leader' && mTaskDetail.status === 'submitted' && (
+                      <>
+                        <button style={{ ...S.red, flex: 1 }} onClick={() => approveTask(mTaskDetail.id)}>✓ Approve</button>
+                        <button style={{ ...S.danger, flex: 1 }} onClick={() => requestRevision(mTaskDetail.id)}>↩ Request Revision</button>
+                      </>
+                    )}
+                    {mTaskDetail.assigneeIds.includes(currentUser.id) && mTaskDetail.status === 'not-started' && (
+                      <button style={{ ...S.red, flex: 1 }} onClick={() => startTask(mTaskDetail.id)}>Start Task</button>
+                    )}
+                    {mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late') && (
+                      <button style={{ ...S.red, flex: 1 }} onClick={() => { setMTaskDetail(null); setMSubmitTask(mTaskDetail) }}>Submit Task</button>
+                    )}
+                    {myRole === 'leader' && mTaskDetail.status !== 'submitted' && mTaskDetail.status !== 'done' && (
+                      <button style={{ ...S.ghost, fontSize: '12px', padding: '7px 12px' }} onClick={() => { setEditingTask(mTaskDetail); setMTaskDetail(null) }}>Edit Task</button>
+                    )}
+                  </div>
+                ) : null}
               </Modal>
             )}
 
