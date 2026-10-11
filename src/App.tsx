@@ -776,11 +776,17 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
   showNotifs: boolean; onToggleNotifs: () => void
   onRoomClick: (id: string) => void
 }) {
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--ontrack-bg)', color: 'var(--ontrack-text)', fontFamily: 'Inter, sans-serif' }}>
       {/* Top nav */}
       <header style={{ height: '50px', background: 'var(--ontrack-bg)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', flexShrink: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <button onClick={() => setSidebarOpen(v => !v)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', color: 'var(--ontrack-text-secondary)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
+            <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
+            <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
+          </button>
           <button onClick={() => setView('home')} style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>ONTRACK</button>
           {view === 'room' && currentRoom && <span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>/ {currentRoom.title}</span>}
         </div>
@@ -817,8 +823,8 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
       </header>
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-        {/* Sidebar */}
-        <aside style={{ width: '210px', background: 'var(--ontrack-surface-elevated)', borderRight: '1px solid var(--ontrack-text)', display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto' }}>
+        {sidebarOpen && (
+        <aside style={{ width: '210px', background: 'var(--ontrack-surface-elevated)', borderRight: '1px solid var(--ontrack-border)', display: 'flex', flexDirection: 'column', flexShrink: 0, overflowY: 'auto' }}>
           <div style={{ padding: '14px 10px' }}>
             {view === 'room' && currentRoom && (() => {
               const role = memberDB.role(currentRoom.id, currentUser?.id ?? '')
@@ -853,6 +859,7 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
             <SidebarBtn label="Profile"  active={view === 'profile'}  onClick={() => setView('profile')}  dim />
           </div>
         </aside>
+        )}
 
         {/* Main content */}
         <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'auto', minWidth: 0 }}>
