@@ -325,7 +325,7 @@ export default function App() {
       const task = taskDB.insert(data, deps)
       console.debug('[createTask] inserted:', task)
       writeRow('tasks', task)
-      await syncTable('task_deps')
+      syncTable('task_deps') // fire-and-forget
       console.debug('[createTask] calling autoArrange')
       autoArrange()
       console.debug('[createTask] autoArrange done, setting mCreateTask=false')
@@ -344,7 +344,7 @@ export default function App() {
       taskDB.setDeps(id, deps)
       const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
       if (updated) writeRow('tasks', updated)
-      await syncTable('task_deps')
+      syncTable('task_deps') // fire-and-forget
       console.debug('[updateTask] calling autoArrange')
       autoArrange()
       console.debug('[updateTask] autoArrange done, setting editingTask=null')
@@ -399,8 +399,8 @@ export default function App() {
 
   async function deleteTask(taskId: string) {
     taskDB.delete(taskId)
-    await deleteRow('tasks', taskId)
-    await syncTable('task_deps')
+    deleteRow('tasks', taskId) // fire-and-forget
+    syncTable('task_deps') // fire-and-forget
     setMTaskDetail(null)
     autoArrange()
   }
