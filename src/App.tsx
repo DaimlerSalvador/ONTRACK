@@ -292,10 +292,16 @@ export default function App() {
   }
 
   function autoArrange() {
-    if (!currentRoom) return
+    console.debug('[autoArrange] START')
+    if (!currentRoom) {
+      console.debug('[autoArrange] No currentRoom, returning')
+      return
+    }
     const allTasks = taskDB.forRoom(currentRoom.id)
+    console.debug('[autoArrange] tasks:', allTasks.map(t => ({ id: t.id, title: t.title, status: t.status })))
     const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
     const layout = computeFlowchartLayout(allTasks, taskDepsMap)
+    console.debug('[autoArrange] layout:', layout)
     allTasks.forEach(t => {
       const pos = layout[t.id]
       if (pos) {
@@ -303,39 +309,48 @@ export default function App() {
         if (updated) writeRow('tasks', updated)
       }
     })
+    console.debug('[autoArrange] calling loadRoomData')
     loadRoomData()
+    console.debug('[autoArrange] loadRoomData done')
     // Non-blocking Firestore sync
     syncTable('tasks')
+    console.debug('[autoArrange] COMPLETE')
   }
 
   // ── Task actions ──
 
   async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
-    console.debug('[createTask] data:', data, 'deps:', deps)
+    console.debug('[createTask] START data:', data, 'deps:', deps)
     try {
       const task = taskDB.insert(data, deps)
       console.debug('[createTask] inserted:', task)
       writeRow('tasks', task)
       await syncTable('task_deps')
+      console.debug('[createTask] calling autoArrange')
       autoArrange()
+      console.debug('[createTask] autoArrange done, setting mCreateTask=false')
       setMCreateTask(false)
       loadNotifs()
+      console.debug('[createTask] COMPLETE')
     } catch (e) {
       console.error('[createTask] Error:', e)
     }
   }
 
   async function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
-    console.debug('[updateTask] id:', id, 'data:', data, 'deps:', deps)
+    console.debug('[updateTask] START id:', id, 'data:', data, 'deps:', deps)
     try {
       taskDB.update(id, data)
       taskDB.setDeps(id, deps)
       const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
       if (updated) writeRow('tasks', updated)
       await syncTable('task_deps')
+      console.debug('[updateTask] calling autoArrange')
       autoArrange()
+      console.debug('[updateTask] autoArrange done, setting editingTask=null')
       setEditingTask(null)
       loadNotifs()
+      console.debug('[updateTask] COMPLETE')
     } catch (e) {
       console.error('[updateTask] Error:', e)
     }
