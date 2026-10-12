@@ -317,8 +317,8 @@ export default function App() {
       console.debug('[createTask] inserted:', task)
       writeRow('tasks', task)
       await syncTable('task_deps')
-      setMCreateTask(false)
       autoArrange()
+      setMCreateTask(false)
       loadNotifs()
     } catch (e) {
       console.error('[createTask] Error:', e)
@@ -333,8 +333,8 @@ export default function App() {
       const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
       if (updated) writeRow('tasks', updated)
       await syncTable('task_deps')
-      setEditingTask(null)
       autoArrange()
+      setEditingTask(null)
       loadNotifs()
     } catch (e) {
       console.error('[updateTask] Error:', e)
@@ -725,7 +725,13 @@ export default function App() {
                 taskDeps={taskDeps}
                 task={editingTask ?? undefined}
                 onClose={() => { setMCreateTask(false); setEditingTask(null) }}
-                onSave={editingTask ? (data, deps) => updateTask(editingTask.id, data, deps) : createTask}
+                onSave={(data, deps) => {
+                  if (editingTask) {
+                    updateTask(editingTask.id, data, deps)
+                  } else {
+                    createTask(data, deps)
+                  }
+                }}
                 onDelete={() => { if (editingTask) deleteTask(editingTask.id); setEditingTask(null) }}
               />
             )}
