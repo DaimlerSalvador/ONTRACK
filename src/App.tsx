@@ -715,7 +715,7 @@ export default function App() {
                 task={editingTask ?? undefined}
                 onClose={() => { setMCreateTask(false); setEditingTask(null) }}
                 onSave={editingTask ? (data, deps) => updateTask(editingTask.id, data, deps) : createTask}
-                onDelete={() => { setEditingTask(null); loadRoomData() }}
+                onDelete={() => { if (editingTask) deleteTask(editingTask.id); setEditingTask(null) }}
               />
             )}
 
