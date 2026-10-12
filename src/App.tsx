@@ -291,31 +291,21 @@ export default function App() {
     loadRoomData()
   }
 
-  async function autoArrange() {
-    if (!currentRoom) {
-      console.warn('[autoArrange] No currentRoom, skipping')
-      return
-    }
-    try {
-      const allTasks = taskDB.forRoom(currentRoom.id)
-      console.debug('[autoArrange] Tasks:', allTasks.map(t => ({ id: t.id, title: t.title, x: t.x, y: t.y, status: t.status })))
-      const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
-      console.debug('[autoArrange] Deps:', taskDepsMap)
-      const layout = computeFlowchartLayout(allTasks, taskDepsMap)
-      console.debug('[autoArrange] Layout:', layout)
-      allTasks.forEach(t => {
-        const pos = layout[t.id]
-        if (pos) {
-          const updated = taskDB.update(t.id, { x: pos.x, y: pos.y })
-          if (updated) writeRow('tasks', updated)
-        }
-      })
-      await syncTable('tasks')
-      loadRoomData()
-    } catch (e) {
-      console.error('[autoArrange] Error:', e)
-      loadRoomData()
-    }
+  function autoArrange() {
+    if (!currentRoom) return
+    const allTasks = taskDB.forRoom(currentRoom.id)
+    const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
+    const layout = computeFlowchartLayout(allTasks, taskDepsMap)
+    allTasks.forEach(t => {
+      const pos = layout[t.id]
+      if (pos) {
+        const updated = taskDB.update(t.id, { x: pos.x, y: pos.y })
+        if (updated) writeRow('tasks', updated)
+      }
+    })
+    loadRoomData()
+    // Non-blocking Firestore sync
+    syncTable('tasks')
   }
 
   // ── Task actions ──
@@ -323,47 +313,39 @@ export default function App() {
   async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     const task = taskDB.insert(data, deps)
     writeRow('tasks', task)
-    loadRoomData()
     await syncTable('task_deps')
     setMCreateTask(false)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
   async function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     taskDB.update(id, data)
     taskDB.setDeps(id, deps)
-    loadRoomData()
     const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
     if (updated) writeRow('tasks', updated)
     await syncTable('task_deps')
     setEditingTask(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
   async function submitTask(taskId: string, link: string) {
     if (!currentRoom) return
     taskDB.submit(taskId, link, currentRoom.leaderId)
-    loadRoomData()
     const updated = taskDB.forRoom(currentRoom.id).find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
   async function startTask(taskId: string) {
     taskDB.update(taskId, { status: 'in-progress' })
-    loadRoomData()
     const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -371,12 +353,10 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.approve(taskId, task.assigneeIds)
-    loadRoomData()
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
@@ -384,23 +364,19 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.requestRevision(taskId, task.assigneeIds)
-    loadRoomData()
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
     loadNotifs()
   }
 
   async function deleteTask(taskId: string) {
     taskDB.delete(taskId)
-    loadRoomData()
     await deleteRow('tasks', taskId)
     await syncTable('task_deps')
     setMTaskDetail(null)
-    await autoArrange()
-    loadRoomData()
+    autoArrange()
   }
 
   // ── Chat ──
