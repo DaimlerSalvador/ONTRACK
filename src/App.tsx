@@ -311,23 +311,34 @@ export default function App() {
   // ── Task actions ──
 
   async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
-    const task = taskDB.insert(data, deps)
-    writeRow('tasks', task)
-    await syncTable('task_deps')
-    setMCreateTask(false)
-    autoArrange()
-    loadNotifs()
+    console.debug('[createTask] data:', data, 'deps:', deps)
+    try {
+      const task = taskDB.insert(data, deps)
+      console.debug('[createTask] inserted:', task)
+      writeRow('tasks', task)
+      await syncTable('task_deps')
+      setMCreateTask(false)
+      autoArrange()
+      loadNotifs()
+    } catch (e) {
+      console.error('[createTask] Error:', e)
+    }
   }
 
   async function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
-    taskDB.update(id, data)
-    taskDB.setDeps(id, deps)
-    const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
-    if (updated) writeRow('tasks', updated)
-    await syncTable('task_deps')
-    setEditingTask(null)
-    autoArrange()
-    loadNotifs()
+    console.debug('[updateTask] id:', id, 'data:', data, 'deps:', deps)
+    try {
+      taskDB.update(id, data)
+      taskDB.setDeps(id, deps)
+      const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
+      if (updated) writeRow('tasks', updated)
+      await syncTable('task_deps')
+      setEditingTask(null)
+      autoArrange()
+      loadNotifs()
+    } catch (e) {
+      console.error('[updateTask] Error:', e)
+    }
   }
 
   async function submitTask(taskId: string, link: string) {
@@ -1507,6 +1518,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
   }
 
   function save() {
+    console.debug('[CreateTaskModal.save] title:', title, 'deadline:', deadline, 'assigneeIds:', assigneeIds, 'deps:', deps, 'isEditing:', isEditing)
     if (!title.trim()) return
     validateDeadline(deadline)
     if (deadlineError) return
@@ -1528,6 +1540,7 @@ function CreateTaskModal({ roomId, members, existingTasks, taskDeps, task, onClo
       x,
       y,
     }
+    console.debug('[CreateTaskModal.save] calling onSave with:', data)
     onSave(data, deps.filter(id => id !== task?.id))
   }
 
