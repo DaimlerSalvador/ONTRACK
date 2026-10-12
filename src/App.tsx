@@ -292,20 +292,30 @@ export default function App() {
   }
 
   async function autoArrange() {
-    if (!currentRoom) return
-    const allTasks = taskDB.forRoom(currentRoom.id)
-    const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
-    const layout = computeFlowchartLayout(allTasks, taskDepsMap)
-    allTasks.forEach(t => {
-      const pos = layout[t.id]
-      if (pos) {
-        const updated = taskDB.update(t.id, { x: pos.x, y: pos.y })
-        if (updated) writeRow('tasks', updated)
-      }
-    })
-    // Force sync to ensure Firestore state matches local before reloading
-    await syncTable('tasks')
-    loadRoomData()
+    if (!currentRoom) {
+      console.warn('[autoArrange] No currentRoom, skipping')
+      return
+    }
+    try {
+      const allTasks = taskDB.forRoom(currentRoom.id)
+      console.debug('[autoArrange] Tasks:', allTasks.map(t => ({ id: t.id, title: t.title, x: t.x, y: t.y, status: t.status })))
+      const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
+      console.debug('[autoArrange] Deps:', taskDepsMap)
+      const layout = computeFlowchartLayout(allTasks, taskDepsMap)
+      console.debug('[autoArrange] Layout:', layout)
+      allTasks.forEach(t => {
+        const pos = layout[t.id]
+        if (pos) {
+          const updated = taskDB.update(t.id, { x: pos.x, y: pos.y })
+          if (updated) writeRow('tasks', updated)
+        }
+      })
+      await syncTable('tasks')
+      loadRoomData()
+    } catch (e) {
+      console.error('[autoArrange] Error:', e)
+      loadRoomData()
+    }
   }
 
   // ── Task actions ──
@@ -317,6 +327,7 @@ export default function App() {
     await syncTable('task_deps')
     setMCreateTask(false)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -329,6 +340,7 @@ export default function App() {
     await syncTable('task_deps')
     setEditingTask(null)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -340,6 +352,7 @@ export default function App() {
     if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -350,6 +363,7 @@ export default function App() {
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -362,6 +376,7 @@ export default function App() {
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -374,6 +389,7 @@ export default function App() {
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
     await autoArrange()
+    loadRoomData()
     loadNotifs()
   }
 
@@ -384,6 +400,7 @@ export default function App() {
     await syncTable('task_deps')
     setMTaskDetail(null)
     await autoArrange()
+    loadRoomData()
   }
 
   // ── Chat ──
