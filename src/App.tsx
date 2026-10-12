@@ -9,6 +9,7 @@ import { waitForFirebase } from './firebase'
 import { initFirebaseSync, writeRow, deleteRow, syncTable } from './firebase-db'
 import { applyTheme, stopThemeObserver, type Theme } from './theme'
 import registerBackground from './assets/registerbackground.jpg'
+import logoImg from './assets/logo.jpg'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -819,7 +820,7 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
             <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
             <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
           </button>
-          <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+          <img src={logoImg} alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
           <button onClick={() => setView('home')} style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>ONTRACK</button>
           {view === 'room' && currentRoom && <span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>/ {currentRoom.title}</span>}
         </div>
@@ -918,7 +919,7 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
       </svg>
       <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+          <img src={logoImg} alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
           <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)' }}>ONTRACK</span>
         </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -999,7 +1000,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
         <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
       <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+        <img src={logoImg} alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
         <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
       <div style={{ flex: 1, display: 'flex', position: 'relative', zIndex: 10, paddingLeft: 0, marginTop: 0 }}>
