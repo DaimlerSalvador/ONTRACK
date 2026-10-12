@@ -313,7 +313,6 @@ export default function App() {
   async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     const task = taskDB.insert(data, deps)
     writeRow('tasks', task)
-    loadRoomData()
     await syncTable('task_deps')
     setMCreateTask(false)
     await autoArrange()
