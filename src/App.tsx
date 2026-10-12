@@ -313,6 +313,7 @@ export default function App() {
   async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     const task = taskDB.insert(data, deps)
     writeRow('tasks', task)
+    loadRoomData()
     await syncTable('task_deps')
     setMCreateTask(false)
     await autoArrange()
@@ -322,8 +323,9 @@ export default function App() {
   async function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     taskDB.update(id, data)
     taskDB.setDeps(id, deps)
-    const updated = taskDB.forRoom(currentRoomId ?? '')
-    updated.filter(t => t.id === id).forEach(t => writeRow('tasks', t))
+    loadRoomData()
+    const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === id)
+    if (updated) writeRow('tasks', updated)
     await syncTable('task_deps')
     setEditingTask(null)
     await autoArrange()
@@ -333,6 +335,7 @@ export default function App() {
   async function submitTask(taskId: string, link: string) {
     if (!currentRoom) return
     taskDB.submit(taskId, link, currentRoom.leaderId)
+    loadRoomData()
     const updated = taskDB.forRoom(currentRoom.id).find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
@@ -342,6 +345,7 @@ export default function App() {
 
   async function startTask(taskId: string) {
     taskDB.update(taskId, { status: 'in-progress' })
+    loadRoomData()
     const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
@@ -353,6 +357,7 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.approve(taskId, task.assigneeIds)
+    loadRoomData()
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
@@ -364,6 +369,7 @@ export default function App() {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.requestRevision(taskId, task.assigneeIds)
+    loadRoomData()
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
@@ -373,6 +379,7 @@ export default function App() {
 
   async function deleteTask(taskId: string) {
     taskDB.delete(taskId)
+    loadRoomData()
     await deleteRow('tasks', taskId)
     await syncTable('task_deps')
     setMTaskDetail(null)
