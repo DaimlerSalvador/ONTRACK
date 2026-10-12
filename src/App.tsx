@@ -8,11 +8,12 @@ import {
 import { waitForFirebase } from './firebase'
 import { initFirebaseSync, writeRow, deleteRow, syncTable } from './firebase-db'
 import { applyTheme, stopThemeObserver, type Theme } from './theme'
+import registerBackground from './assets/registerbackground.jpg'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 type View = 'landing' | 'login' | 'register' | 'home' | 'room' | 'profile' | 'archived'
-type RoomTab = 'flowchart' | 'alltasks' | 'mytasks' | 'chat' | 'members' | 'settings'
+type RoomTab = 'flowchart' | 'alltasks' | 'mytasks' | 'members' | 'settings'
 
 const ROOM_COLORS = ['#7a1c1c', '#1a5230', '#152850', '#7a6200', '#4a1080', '#1a4a5c']
 
@@ -59,6 +60,7 @@ export default function App() {
   const [chatInput, setChatInput] = useState('')
   const [showNotifs, setShowNotifs] = useState(false)
   const [showRoomMenu, setShowRoomMenu] = useState(false)
+  const [showChat, setShowChat] = useState(false)
   const [authError, setAuthError] = useState('')
   const [theme, setTheme] = useState<Theme>(() => {
     if (typeof localStorage === 'undefined') return 'light'
@@ -288,7 +290,7 @@ export default function App() {
     loadRoomData()
   }
 
-  function autoArrange() {
+  async function autoArrange() {
     if (!currentRoom) return
     const allTasks = taskDB.forRoom(currentRoom.id)
     const taskDepsMap = Object.fromEntries(allTasks.map(t => [t.id, taskDB.deps(t.id)]))
@@ -300,78 +302,80 @@ export default function App() {
         if (updated) writeRow('tasks', updated)
       }
     })
+    // Force sync to ensure Firestore state matches local before reloading
+    await syncTable('tasks')
     loadRoomData()
   }
 
   // ── Task actions ──
 
-  function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
+  async function createTask(data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     const task = taskDB.insert(data, deps)
     writeRow('tasks', task)
-    syncTable('task_deps')
+    await syncTable('task_deps')
     setMCreateTask(false)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
+  async function updateTask(id: string, data: Omit<Task, 'id' | 'createdAt'>, deps: string[]) {
     taskDB.update(id, data)
     taskDB.setDeps(id, deps)
     const updated = taskDB.forRoom(currentRoomId ?? '')
     updated.filter(t => t.id === id).forEach(t => writeRow('tasks', t))
-    syncTable('task_deps')
+    await syncTable('task_deps')
     setEditingTask(null)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function submitTask(taskId: string, link: string) {
+  async function submitTask(taskId: string, link: string) {
     if (!currentRoom) return
     taskDB.submit(taskId, link, currentRoom.leaderId)
     const updated = taskDB.forRoom(currentRoom.id).find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMSubmitTask(null)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function startTask(taskId: string) {
+  async function startTask(taskId: string) {
     taskDB.update(taskId, { status: 'in-progress' })
     const updated = taskDB.forRoom(currentRoomId ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function approveTask(taskId: string) {
+  async function approveTask(taskId: string) {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.approve(taskId, task.assigneeIds)
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function requestRevision(taskId: string) {
+  async function requestRevision(taskId: string) {
     const task = tasks.find(t => t.id === taskId)
     if (!task) return
     taskDB.requestRevision(taskId, task.assigneeIds)
     const updated = taskDB.forRoom(currentRoom?.id ?? '').find(t => t.id === taskId)
     if (updated) writeRow('tasks', updated)
     setMTaskDetail(null)
-    autoArrange()
+    await autoArrange()
     loadNotifs()
   }
 
-  function deleteTask(taskId: string) {
+  async function deleteTask(taskId: string) {
     taskDB.delete(taskId)
-    deleteRow('tasks', taskId)
-    syncTable('task_deps')
+    await deleteRow('tasks', taskId)
+    await syncTable('task_deps')
     setMTaskDetail(null)
-    autoArrange()
+    await autoArrange()
   }
 
   // ── Chat ──
@@ -455,25 +459,25 @@ export default function App() {
       )}
 
       {/* ━━━ ARCHIVED ━━━ */}
-      {view === 'archived' && (
+{view === 'archived' && (
         <div style={{ padding: '32px 40px' }}>
           <h2 style={{ fontSize: '17px', fontWeight: 700, marginBottom: '24px' }}>Archived Rooms</h2>
           {archivedRooms.length === 0
             ? <Empty text="No archived rooms." />
             : archivedRooms.map(r => (
-              <div key={r.id} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '7px', padding: '18px 22px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
-                <div>
-                  <div style={{ fontWeight: 700, marginBottom: '3px' }}>{r.title}</div>
-                  <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', marginBottom: '3px' }}>{r.description}</div>
-                  <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Leader: {userDB.find(r.leaderId)?.name}</div>
-                </div>
-<div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                <div key={r.id} style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderLeft: `4px solid ${r.color}`, borderRadius: '7px', padding: '18px 22px', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                  <div>
+                    <div style={{ fontWeight: 700, marginBottom: '3px' }}>{r.title}</div>
+                    <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)', marginBottom: '3px' }}>{r.description}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Leader: {userDB.find(r.leaderId)?.name}</div>
+                  </div>
+                <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
                   <button style={{ ...S.ghost, fontSize: '12px', padding: '6px 12px' }} onClick={() => { unarchiveRoom(r.id) }}>Unarchive</button>
                   <button style={{ ...S.danger, fontSize: '12px', padding: '6px 12px' }} onClick={() => { if (confirm(`Delete "${r.title}"? This cannot be undone.`)) deleteRoom(r.id) }}>Delete</button>
                 </div>
               </div>
-            ))
-          }
+              ))
+            }
         </div>
       )}
 
@@ -507,7 +511,7 @@ export default function App() {
                 )}
               </div>
               <div style={{ display: 'flex' }}>
-                {(['flowchart', ...(myRole === 'leader' ? ['alltasks'] : []), 'mytasks', 'chat', 'members', ...(myRole === 'leader' ? ['settings'] : [])] as RoomTab[]).map(t => (
+                {(['flowchart', ...(myRole === 'leader' ? ['alltasks'] : []), 'mytasks', 'members', ...(myRole === 'leader' ? ['settings'] : [])] as RoomTab[]).map(t => (
                   <button key={t} onClick={() => setRoomTab(t)} style={{
                     background: 'none', border: 'none', padding: '10px 20px', fontSize: '13px',
                     cursor: 'pointer', fontWeight: roomTab === t ? 600 : 400,
@@ -608,18 +612,6 @@ export default function App() {
                     ))
                   }
                 </div>
-              )}
-
-              {/* ── Chat ── */}
-              {roomTab === 'chat' && (
-                <ChatView
-                  messages={messages}
-                  currentUserId={currentUser.id}
-                  getUserName={getUserName}
-                  chatInput={chatInput}
-                  setChatInput={setChatInput}
-                  onSend={sendMessage}
-                />
               )}
 
               {/* ── Members ── */}
@@ -745,12 +737,52 @@ export default function App() {
                   <button style={{ ...S.danger, flex: 1 }} onClick={() => deleteRoom(currentRoom.id)}>Delete Room</button>
                   <button style={{ ...S.ghost, flex: 1 }} onClick={() => setMDeleteRoom(false)}>Cancel</button>
                 </div>
-              </Modal>
+</Modal>
             )}
+
+            {/* Floating Chat Panel */}
+            {showChat && (
+              <div style={{ position: 'fixed', bottom: '90px', right: '24px', zIndex: 200, width: '380px', maxHeight: '500px', background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '12px', boxShadow: '0 16px 48px rgba(0,0,0,0.3)', display: 'flex', flexDirection: 'column', overflow: 'hidden', animation: 'slideIn 0.2s ease-out' }}>
+                <div style={{ background: 'var(--ontrack-primary)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: 700, fontSize: '14px', color: '#fff' }}>Messages</span>
+                  <button onClick={() => setShowChat(false)} style={{ background: 'none', border: 'none', color: '#fff', fontSize: '18px', cursor: 'pointer', lineHeight: 1, padding: '0 4px' }}>✕</button>
+                </div>
+                <ChatView
+                  messages={messages}
+                  currentUserId={currentUser.id}
+                  getUserName={getUserName}
+                  chatInput={chatInput}
+                  setChatInput={setChatInput}
+                  onSend={sendMessage}
+                  compact={true}
+                />
+              </div>
+            )}
+
+            {/* Floating Chat Button */}
+            <button
+              onClick={() => setShowChat(v => !v)}
+              style={{
+                position: 'fixed', bottom: '24px', right: '24px', zIndex: 190,
+                width: '56px', height: '56px', borderRadius: '50%',
+                background: 'var(--ontrack-primary)', border: 'none',
+                color: '#fff', cursor: 'pointer',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s, box-shadow 0.2s'
+              }}
+              onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              aria-label="Open chat"
+            >
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"></path>
+              </svg>
+            </button>
+
           </>
         )
       })()}
-
       {/* ── Global modals ── */}
       {mCreateRoom && (
         <CreateRoomModal
@@ -787,6 +819,7 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
             <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
             <span style={{ width: '18px', height: '2px', background: 'var(--ontrack-text-secondary)', borderRadius: '1px' }}></span>
           </button>
+          <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
           <button onClick={() => setView('home')} style={{ fontFamily: "'DM Mono', monospace", fontSize: '14px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>ONTRACK</button>
           {view === 'room' && currentRoom && <span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>/ {currentRoom.title}</span>}
         </div>
@@ -884,7 +917,10 @@ function LandingPage({ onLogin, onRegister }: { onLogin: () => void; onRegister:
         <ellipse cx="15%" cy="25%" rx="22%" ry="35%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(-25,200,200)" />
       </svg>
       <nav style={{ position: 'relative', zIndex: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)' }}>
-        <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)' }}>ONTRACK</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
+          <span style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)' }}>ONTRACK</span>
+        </div>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <button onClick={onLogin} style={{ background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', fontSize: '13px', cursor: 'pointer', padding: '8px 14px' }}>Log in</button>
           <button onClick={onRegister} style={{ ...S.red, fontSize: '13px' }}>Register Now</button>
@@ -962,7 +998,8 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
         <ellipse cx="30%" cy="65%" rx="50%" ry="35%" fill="none" stroke="var(--ontrack-border)" strokeWidth="1.5" transform="rotate(-10,400,450)" />
         <ellipse cx="75%" cy="30%" rx="35%" ry="28%" fill="none" stroke="var(--ontrack-surface)" strokeWidth="1" transform="rotate(12,700,250)" />
       </svg>
-      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)', flexShrink: 0 }}>
+      <nav style={{ position: 'relative', zIndex: 10, padding: '18px 48px', borderBottom: '1px solid var(--ontrack-border)', background: 'var(--ontrack-bg)', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <img src="/logo.jpg" alt="ONTRACK" style={{ width: '32px', height: '32px', borderRadius: '6px', objectFit: 'cover' }} />
         <button onClick={onBack} style={{ fontFamily: "'DM Mono', monospace", fontSize: '15px', fontWeight: 700, letterSpacing: '0.18em', color: 'var(--ontrack-text)', background: 'none', border: 'none', cursor: 'pointer' }}>ONTRACK</button>
       </nav>
       <div style={{ flex: 1, display: 'flex', position: 'relative', zIndex: 10, paddingLeft: 0, marginTop: 0 }}>
@@ -1002,8 +1039,10 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
           </div>
         </div>
         {/* Right — form */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflowY: 'auto' }}>
-          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '48px', width: '480px', boxSizing: 'border-box', marginLeft: '-40px' }}>
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflowY: 'auto', position: 'relative', minHeight: '100vh', width: '100%' }}>
+          <div style={{ position: 'absolute', inset: 0, background: `url(${registerBackground}) center/cover no-repeat`, backgroundSize: 'cover', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', zIndex: 0 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(2px)', zIndex: 1 }} />
+          <div style={{ position: 'relative', zIndex: 2, background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '48px', width: '480px', boxSizing: 'border-box', marginLeft: '-40px' }}>
           <h2 style={{ fontSize: '26px', fontWeight: 700, marginBottom: '8px', textAlign: 'center', color: 'var(--ontrack-text)' }}>{isLogin ? 'Log in' : 'Create account'}</h2>
           <p style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', textAlign: 'center', marginBottom: '28px' }}>{isLogin ? 'Welcome back to ONTRACK' : 'Join your team on ONTRACK'}</p>
           {error && <div style={{ background: 'var(--ontrack-primary-tint)', border: '1px solid var(--ontrack-primary)', borderRadius: '5px', padding: '10px 14px', marginBottom: '16px', fontSize: '13px', color: 'var(--ontrack-primary)' }}>{error}</div>}
@@ -1351,11 +1390,11 @@ function FlowchartCanvas({ tasks, taskDeps, statusFilter, getUserName, onTaskCli
 
 // ─── Chat view ─────────────────────────────────────────────────────────────────
 
-function ChatView({ messages, currentUserId, getUserName, chatInput, setChatInput, onSend }: { messages: Message[]; currentUserId: string; getUserName: (id: string) => string; chatInput: string; setChatInput: (v: string) => void; onSend: () => void }) {
+function ChatView({ messages, currentUserId, getUserName, chatInput, setChatInput, onSend, compact }: { messages: Message[]; currentUserId: string; getUserName: (id: string) => string; chatInput: string; setChatInput: (v: string) => void; onSend: () => void; compact?: boolean }) {
   const bottomRef = useRef<HTMLDivElement>(null)
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 168px)', minHeight: '400px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: compact ? '100%' : 'calc(100vh - 168px)', minHeight: compact ? 0 : '400px' }}>
       <div style={{ flex: 1, overflowY: 'auto', padding: '20px 32px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {messages.map(m => {
           const mine = m.senderId === currentUserId
@@ -1364,7 +1403,7 @@ function ChatView({ messages, currentUserId, getUserName, chatInput, setChatInpu
               {!mine && <Avatar name={getUserName(m.senderId)} size={32} color="var(--ontrack-border)" />}
               <div style={{ maxWidth: '58%' }}>
                 {!mine && <div style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginBottom: '4px' }}>{getUserName(m.senderId)}</div>}
-                <div style={{ background: mine ? 'var(--ontrack-info)' : 'var(--ontrack-border)', padding: '10px 14px', borderRadius: mine ? '12px 12px 2px 12px' : '12px 12px 12px 2px', fontSize: '14px', color: 'var(--ontrack-text)', lineHeight: 1.5 }}>{m.text}</div>
+                <div style={{ background: mine ? 'var(--ontrack-info)' : 'var(--ontrack-border)', padding: '10px 14px', borderRadius: mine ? '12px 12px 2px 12px' : '12px 12px 12px 2px', fontSize: '14px', color: 'var(--ontrack-text)', lineHeight: 1.5, wordBreak: 'break-word', overflowWrap: 'break-word' }}>{m.text}</div>
                 <div style={{ fontSize: '10px', color: 'var(--ontrack-text-muted)', marginTop: '3px', textAlign: mine ? 'right' : 'left' }}>{fmtTime(m.createdAt)}</div>
               </div>
             </div>
