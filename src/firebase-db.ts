@@ -259,7 +259,44 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
     'notifications',
   ]
 
-// 1. Push any existing localStorage rows to Firestore (best effort)
+  // 0. INITIAL FETCH: Populate localStorage from Firestore (for new devices)
+  console.info('[firebase-sync] Fetching initial data from Firestore...')
+  for (const colName of collections) {
+    const lsKey = lsKeyForCollection(colName)
+    try {
+      const snap = await col(db, colName).get()
+      const rows: any[] = []
+      snap.forEach((doc: any) => {
+        rows.push({ id: doc.id, ...doc.data() })
+      })
+
+      if (colName === 'room_members') {
+        const local = lsGet<any>('members')
+        const byId = new Map(local.map((m) => [`${m.roomId}:${m.userId}`, m]))
+        for (const row of rows) {
+          const key = `${row.roomId}:${row.userId}`
+          byId.set(key, row)
+        }
+        lsSet('members', Array.from(byId.values()))
+      } else if (colName === 'task_deps') {
+        const local = lsGet<any>('task_deps')
+        const byId = new Map(local.map((d) => [`${d.taskId}:${d.dependsOnId}`, d]))
+        for (const row of rows) {
+          const key = `${row.taskId}:${row.dependsOnId}`
+          byId.set(key, row)
+        }
+        lsSet('task_deps', Array.from(byId.values()))
+      } else {
+        lsMerge(lsKey, rows)
+      }
+      notifyChange(NS + lsKey, JSON.stringify(lsGet(lsKey)))
+      console.debug('[firebase-sync] Initial fetch:', colName, rows.length, 'rows')
+    } catch (e) {
+      console.warn('[firebase-sync] Initial fetch failed:', colName, e)
+    }
+  }
+
+  // 1. Push any existing localStorage rows to Firestore (best effort)
   for (const colName of collections) {
     const lsKey = lsKeyForCollection(colName)
     const rows = lsGet(lsKey)
