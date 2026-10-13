@@ -259,11 +259,9 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
     'notifications',
   ]
 
-  // 0. Check if this is a new device (localStorage empty for key tables)
-  const isNewDevice = collections.some(colName => {
-    const lsKey = lsKeyForCollection(colName)
-    return lsGet(lsKey).length === 0
-  })
+  // 0. Check if this is a new device (localStorage empty for KEY tables only)
+  const keyTables = ['users', 'rooms', 'tasks']
+  const isNewDevice = keyTables.some(lsKey => lsGet(lsKey).length === 0)
 
   // 1. Push local changes to Firestore FIRST (preserves local edits)
   console.info('[firebase-sync] Pushing local changes to Firestore...')

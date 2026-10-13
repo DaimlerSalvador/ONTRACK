@@ -118,6 +118,11 @@ export function migrateDB(): void {
 // ─── DB init & seed ───────────────────────────────────────────────────────────
 
 export function initDB(): void {
+  // Check if ANY data exists (more robust than just initialized flag)
+  const hasUsers = localStorage.getItem(NS + 'users')
+  const hasRooms = localStorage.getItem(NS + 'rooms')
+  if (hasUsers && hasRooms) return
+
   if (localStorage.getItem(NS + 'initialized') === 'true') return
 
   // -- users --
