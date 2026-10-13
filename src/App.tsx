@@ -214,6 +214,7 @@ export default function App() {
     const result = userDB.register(`${firstName} ${lastName}`, email, password)
     if (typeof result === 'string') { setAuthError(result); return }
     writeRow('users', result)
+    syncTable('users')
     setCurrentUser(result)
     setRooms([])
     setCurrentRoomId(null)

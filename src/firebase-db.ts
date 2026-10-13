@@ -341,6 +341,7 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
 /**
  * Sync a single table from localStorage → Firestore.
  * Call this after every write operation.
+ * Retries on quota exceeded (up to 3 times with backoff).
  */
 export async function syncTable(
   table: 'users' | 'rooms' | 'members' | 'tasks' | 'task_deps'
@@ -351,10 +352,19 @@ export async function syncTable(
 
   const colName = table === 'members' ? 'room_members' : table
   const rows = lsGet(colName === 'room_members' ? 'members' : colName)
-  try {
-    await colClearAndWrite(db, colName, rows)
-  } catch (e) {
-    console.warn('[firebase-sync] Write failed:', colName, e)
+  
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await colClearAndWrite(db, colName, rows)
+      return
+    } catch (e: any) {
+      console.warn('[firebase-sync] Write failed (attempt', attempt, '):', colName, e?.code || e)
+      if (e?.code === 'resource-exhausted' && attempt < 3) {
+        await new Promise(r => setTimeout(r, 1000 * attempt))
+        continue
+      }
+      break
+    }
   }
 }
 
@@ -377,10 +387,18 @@ export async function writeRow(
     console.warn('[firebase-sync] No document ID for:', table, row)
     return
   }
-  try {
-    await col(db, table).doc(id).set(row, { merge: true })
-  } catch (e) {
-    console.warn('[firebase-sync] Row write failed:', table, id, e)
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await col(db, table).doc(id).set(row, { merge: true })
+      return
+    } catch (e: any) {
+      console.warn('[firebase-sync] Row write failed (attempt', attempt, '):', table, id, e?.code || e)
+      if (e?.code === 'resource-exhausted' && attempt < 3) {
+        await new Promise(r => setTimeout(r, 1000 * attempt))
+        continue
+      }
+      break
+    }
   }
 }
 
