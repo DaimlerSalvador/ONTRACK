@@ -40,9 +40,20 @@ const S = {
 // ─── Root app ──────────────────────────────────────────────────────────────────
 
 export default function App() {
+  // Initialize currentUser from session on startup
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    if (typeof localStorage === 'undefined') return null
+    try {
+      const sessionId = localStorage.getItem('ontrack_session')
+      if (sessionId) {
+        // We need to access userDB, but it's not available here yet
+        // We'll do a lazy init in the effect instead
+      }
+    } catch {}
+    return null
+  })
   const [ready, setReady] = useState(false)
   const [view, setView] = useState<View>('landing')
-  const [currentUser, setCurrentUser] = useState<User | null>(null)
 
   // Room state
   const [rooms, setRooms] = useState<Room[]>([])
@@ -85,7 +96,29 @@ export default function App() {
   useEffect(() => {
     migrateDB()
     initDB()
-    userDB.logout()
+
+    // Restore session
+    const sessionId = localStorage.getItem('ontrack_session')
+    if (sessionId) {
+      const user = userDB.find(sessionId)
+      if (user) {
+        setCurrentUser(user)
+        // Restore view and room state
+        const savedView = localStorage.getItem('ontrack_view') as View | null
+        const savedRoomId = localStorage.getItem('ontrack_roomId')
+        const savedTab = localStorage.getItem('ontrack_roomTab') as RoomTab | null
+        if (savedView && savedView !== 'landing' && savedView !== 'login' && savedView !== 'register') {
+          setView(savedView)
+        }
+        if (savedRoomId) {
+          setCurrentRoomId(savedRoomId)
+        }
+        if (savedTab) {
+          setRoomTab(savedTab)
+        }
+      }
+    }
+
     // Initialize Firebase sync (degrades gracefully if unavailable)
     waitForFirebase(3000).then((ok) => {
       if (ok) {
@@ -94,6 +127,19 @@ export default function App() {
     })
     setReady(true)
   }, [])
+
+  // Persist view, room, tab to localStorage
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('ontrack_view', view)
+      localStorage.setItem('ontrack_roomId', currentRoomId ?? '')
+      localStorage.setItem('ontrack_roomTab', roomTab)
+    } else {
+      localStorage.removeItem('ontrack_view')
+      localStorage.removeItem('ontrack_roomId')
+      localStorage.removeItem('ontrack_roomTab')
+    }
+  }, [view, currentRoomId, roomTab, currentUser])
 
   // ── Theme ──
 
