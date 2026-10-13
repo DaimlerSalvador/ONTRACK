@@ -168,6 +168,9 @@ function startPolling(db: any, collections: string[]): void {
   if (isPolling) return
   isPolling = true
   
+  let consecutiveErrors = 0
+  const maxConsecutiveErrors = 3
+  
   const poll = async () => {
     try {
       for (const colName of collections) {
@@ -199,16 +202,25 @@ function startPolling(db: any, collections: string[]): void {
         }
         notifyChange(NS + lsKey, JSON.stringify(lsGet(lsKey)))
       }
-    } catch (e) {
-      console.debug('[firebase-sync] Poll failed:', e)
+      consecutiveErrors = 0
+    } catch (e: any) {
+      consecutiveErrors++
+      console.debug('[firebase-sync] Poll failed:', e?.code || e)
+      
+      // If quota exceeded repeatedly, stop polling and rely on localStorage only
+      if (e?.code === 'resource-exhausted' && consecutiveErrors >= maxConsecutiveErrors) {
+        console.warn('[firebase-sync] Quota exceeded repeatedly — stopping polling, using localStorage only')
+        stopPolling()
+        return
+      }
     }
   }
 
-  // Poll every 10 seconds
-  pollInterval = setInterval(poll, 10_000)
-  // Initial poll after 2 seconds
-  setTimeout(poll, 2_000)
-  console.info('[firebase-sync] Fallback polling started (10s interval)')
+  // Poll every 30 seconds (reduced from 10s to avoid quota)
+  pollInterval = setInterval(poll, 30_000)
+  // Initial poll after 5 seconds
+  setTimeout(poll, 5_000)
+  console.info('[firebase-sync] Fallback polling started (30s interval)')
 }
 
 function stopPolling(): void {
@@ -247,7 +259,7 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
     'notifications',
   ]
 
-  // 1. Push any existing localStorage rows to Firestore
+// 1. Push any existing localStorage rows to Firestore (best effort)
   for (const colName of collections) {
     const lsKey = lsKeyForCollection(colName)
     const rows = lsGet(lsKey)
@@ -261,48 +273,10 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
     }
   }
 
-  // 2. Attach real-time listeners
-  for (const colName of collections) {
-    const lsKey = lsKeyForCollection(colName)
-    const handler = col(db, colName).onSnapshot(
-      (snap: any) => {
-        const rows: any[] = []
-        snap.forEach((doc: any) => {
-          rows.push({ id: doc.id, ...doc.data() })
-        })
+  // 2. Skip real-time listeners (they consume quota) — use polling instead
+  console.info('[firebase-sync] Real-time listeners disabled (quota conservation) — using polling')
 
-        // room_members and task_deps need special merge logic (composite keys)
-        if (colName === 'room_members') {
-          const local = lsGet<any>('members')
-          const byId = new Map(local.map((m) => [`${m.roomId}:${m.userId}`, m]))
-          for (const row of rows) {
-            const key = `${row.roomId}:${row.userId}`
-            byId.set(key, row)
-          }
-          lsSet('members', Array.from(byId.values()))
-        } else if (colName === 'task_deps') {
-          const local = lsGet<any>('task_deps')
-          const byId = new Map(local.map((d) => [`${d.taskId}:${d.dependsOnId}`, d]))
-          for (const row of rows) {
-            const key = `${row.taskId}:${row.dependsOnId}`
-            byId.set(key, row)
-          }
-          lsSet('task_deps', Array.from(byId.values()))
-        } else {
-          // For regular tables, Firestore doc.id matches row.id
-          lsMerge(lsKey, rows)
-        }
-
-        notifyChange(NS + lsKey, JSON.stringify(lsGet(lsKey)))
-      },
-      (err: Error) => {
-        console.error('[firebase-sync] Listener error:', colName, err)
-      },
-    )
-    listeners.push(handler)
-  }
-
-  // 3. Listen for session changes (cross-device login/logout)
+  // 3. Listen for session changes only (lightweight)
   try {
     const sessionHandler = col(db, 'sessions').onSnapshot(
       (snap: any) => {
@@ -320,11 +294,10 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
     // sessions collection is optional — ignore errors
   }
 
-  console.info('[firebase-sync] Real-time listeners attached for', collections.length, 'collections')
-
-  // 4. Start fallback polling in case real-time listeners fail (e.g., quota exceeded)
+  // 4. Start polling for sync (every 30s to conserve quota)
   startPolling(db, collections)
 
+  console.info('[firebase-sync] Polling-only sync initialized for', collections.length, 'collections')
   return 'ready'
 }
 
