@@ -161,6 +161,63 @@ function notifyChange(key: string, value: string): void {
  *     localStorage and dispatch `ontrack:sync` events.
  */
 let listeners: Array<() => void> = []
+let pollInterval: ReturnType<typeof setInterval> | null = null
+let isPolling = false
+
+function startPolling(db: any, collections: string[]): void {
+  if (isPolling) return
+  isPolling = true
+  
+  const poll = async () => {
+    try {
+      for (const colName of collections) {
+        const lsKey = lsKeyForCollection(colName)
+        const snap = await col(db, colName).get()
+        const rows: any[] = []
+        snap.forEach((doc: any) => {
+          rows.push({ id: doc.id, ...doc.data() })
+        })
+
+        if (colName === 'room_members') {
+          const local = lsGet<any>('members')
+          const byId = new Map(local.map((m) => [`${m.roomId}:${m.userId}`, m]))
+          for (const row of rows) {
+            const key = `${row.roomId}:${row.userId}`
+            byId.set(key, row)
+          }
+          lsSet('members', Array.from(byId.values()))
+        } else if (colName === 'task_deps') {
+          const local = lsGet<any>('task_deps')
+          const byId = new Map(local.map((d) => [`${d.taskId}:${d.dependsOnId}`, d]))
+          for (const row of rows) {
+            const key = `${row.taskId}:${row.dependsOnId}`
+            byId.set(key, row)
+          }
+          lsSet('task_deps', Array.from(byId.values()))
+        } else {
+          lsMerge(lsKey, rows)
+        }
+        notifyChange(NS + lsKey, JSON.stringify(lsGet(lsKey)))
+      }
+    } catch (e) {
+      console.debug('[firebase-sync] Poll failed:', e)
+    }
+  }
+
+  // Poll every 10 seconds
+  pollInterval = setInterval(poll, 10_000)
+  // Initial poll after 2 seconds
+  setTimeout(poll, 2_000)
+  console.info('[firebase-sync] Fallback polling started (10s interval)')
+}
+
+function stopPolling(): void {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+    pollInterval = null
+  }
+  isPolling = false
+}
 
 export async function initFirebaseSync(): Promise<SyncStatus> {
   if (!hasFirebaseConfig) {
@@ -264,6 +321,10 @@ export async function initFirebaseSync(): Promise<SyncStatus> {
   }
 
   console.info('[firebase-sync] Real-time listeners attached for', collections.length, 'collections')
+
+  // 4. Start fallback polling in case real-time listeners fail (e.g., quota exceeded)
+  startPolling(db, collections)
+
   return 'ready'
 }
 
@@ -335,4 +396,8 @@ export function detachListeners(): void {
     unsub()
   }
   listeners = []
+  if (pollInterval) {
+    clearInterval(pollInterval)
+    pollInterval = null
+  }
 }
