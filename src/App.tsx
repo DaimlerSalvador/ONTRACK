@@ -1336,6 +1336,7 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
   const vGap = 80
   const startX = 80
   const startY = 50
+  const componentGap = 120 // extra spacing between components
 
   if (tasks.length === 0) return {}
 
@@ -1344,6 +1345,18 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
   const deps: Record<string, string[]> = {}
   tasks.forEach(t => {
     deps[t.id] = (taskDeps[t.id] ?? []).filter(id => taskMap.has(id))
+  })
+
+  const children: Record<string, string[]> = {}
+  tasks.forEach(t => {
+    children[t.id] = []
+  })
+  tasks.forEach(t => {
+    deps[t.id].forEach(p => {
+      if (children[p]) {
+        children[p].push(t.id)
+      }
+    })
   })
 
   const memo = new Map<string, number>()
@@ -1356,54 +1369,108 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
   }
   tasks.forEach(t => getLevel(t.id))
 
-  const groups = new Map<number, Task[]>()
-  tasks.forEach(t => {
-    const lvl = memo.get(t.id) ?? 0
-    if (!groups.has(lvl)) groups.set(lvl, [])
-    groups.get(lvl)!.push(t)
+  const getAncestors = (id: string, visited = new Set<string>()): Set<string> => {
+    if (visited.has(id)) return visited
+    visited.add(id)
+    deps[id].forEach(p => getAncestors(p, visited))
+    return visited
+  }
+
+  const getDescendants = (id: string, visited = new Set<string>()): Set<string> => {
+    if (visited.has(id)) return visited
+    visited.add(id)
+    children[id].forEach(c => getDescendants(c, visited))
+    return visited
+  }
+
+  const taskIds = tasks.map(t => t.id)
+  const visited = new Set<string>()
+  const components: string[][] = []
+
+  taskIds.forEach(id => {
+    if (visited.has(id)) return
+    const componentNodes = getDescendants(id, new Set())
+    deps[id].forEach(p => {
+      getDescendants(p, componentNodes)
+    })
+    const allConnected = new Set(componentNodes)
+    getAncestors(id, allConnected)
+    componentNodes.forEach(n => visited.add(n))
+    if (allConnected.size > 0) {
+      const comp = Array.from(allConnected).filter(x => taskMap.has(x))
+      if (comp.length > 0) {
+        const alreadyExists = components.some(c => c.length === comp.length && c.every(x => comp.includes(x)))
+        if (!alreadyExists) components.push(comp)
+      }
+    } else {
+      visited.add(id)
+      components.push([id])
+    }
   })
 
-  const levels = Array.from(groups.keys()).sort((a, b) => a - b)
+  if (components.length === 0) components.push(taskIds)
+
+  components.sort((a, b) => {
+    const minA = Math.min(...a.map(x => memo.get(x) ?? 0))
+    const minB = Math.min(...b.map(x => memo.get(x) ?? 0))
+    return minA - minB
+  })
 
   const positions = new Map<string, { x: number; y: number }>()
+  let componentOffsetX = startX
 
-  levels.forEach(lvl => {
-    const group = groups.get(lvl)!
-    const y = startY + lvl * (nodeH + vGap)
+  components.forEach(comp => {
+    const compTasks = comp.map(id => taskMap.get(id)!).filter(Boolean)
+    const compGroups = new Map<number, Task[]>()
+    compTasks.forEach(t => {
+      const lvl = memo.get(t.id) ?? 0
+      if (!compGroups.has(lvl)) compGroups.set(lvl, [])
+      compGroups.get(lvl)!.push(t)
+    })
+    const compLevels = Array.from(compGroups.keys()).sort((a, b) => a - b)
 
-    if (lvl === 0) {
-      const totalWidth = group.length * nodeW + (group.length - 1) * hGap
-      let x = startX + Math.max(0, (900 - totalWidth) / 2)
-      group.forEach(t => {
-        positions.set(t.id, { x, y })
-        x += nodeW + hGap
-      })
-    } else {
-      const items = group.map(t => {
-        const parentIds = deps[t.id]
-        if (parentIds.length === 0) return { id: t.id, idealX: startX }
-        const parentXs = parentIds.map(pid => positions.get(pid)!.x + nodeW / 2)
-        const avgX = parentXs.reduce((sum, x) => sum + x, 0) / parentXs.length
-        return { id: t.id, idealX: avgX - nodeW / 2 }
-      })
+    let componentWidth = 0
+    compLevels.forEach(lvl => {
+      const group = compGroups.get(lvl)!
+      const width = group.length * nodeW + Math.max(0, group.length - 1) * hGap
+      if (width > componentWidth) componentWidth = width
+    })
 
-      items.sort((a, b) => a.idealX - b.idealX)
-
-      // Center the group under the average parent center
-      const groupWidth = group.length * nodeW + (group.length - 1) * hGap
-      const groupCenterX = items.reduce((sum, item) => sum + item.idealX + nodeW / 2, 0) / group.length
-      let currentX = Math.max(startX, groupCenterX - groupWidth / 2)
-
-      items.forEach((item, i) => {
-        if (i > 0) {
-          const prevX = positions.get(items[i - 1].id)!.x
-          const minX = prevX + nodeW + hGap
-          if (currentX < minX) currentX = minX
-        }
-        positions.set(item.id, { x: currentX, y })
-        currentX += nodeW + hGap
-      })
-    }
+    const compStartX = componentOffsetX
+    compLevels.forEach(lvl => {
+      const group = compGroups.get(lvl)!
+      const y = startY + lvl * (nodeH + vGap)
+      if (lvl === 0) {
+        const totalWidth = group.length * nodeW + (group.length - 1) * hGap
+        let x = compStartX + Math.max(0, (componentWidth - totalWidth) / 2)
+        group.forEach(t => {
+          positions.set(t.id, { x, y })
+          x += nodeW + hGap
+        })
+      } else {
+        const items = group.map(t => {
+          const parentIds = deps[t.id].filter(pid => comp.includes(pid))
+          if (parentIds.length === 0) return { id: t.id, idealX: compStartX }
+          const parentXs = parentIds.map(pid => positions.get(pid)!.x + nodeW / 2)
+          const avgX = parentXs.reduce((sum, x) => sum + x, 0) / parentXs.length
+          return { id: t.id, idealX: avgX - nodeW / 2 }
+        })
+        items.sort((a, b) => a.idealX - b.idealX)
+        const groupWidth = group.length * nodeW + (group.length - 1) * hGap
+        const groupCenterX = items.reduce((sum, item) => sum + item.idealX + nodeW / 2, 0) / group.length
+        let currentX = Math.max(compStartX, groupCenterX - groupWidth / 2)
+        items.forEach((item, i) => {
+          if (i > 0) {
+            const prevX = positions.get(items[i - 1].id)!.x
+            const minX = prevX + nodeW + hGap
+            if (currentX < minX) currentX = minX
+          }
+          positions.set(item.id, { x: currentX, y })
+          currentX += nodeW + hGap
+        })
+      }
+    })
+    componentOffsetX += componentWidth + componentGap
   })
 
   return Object.fromEntries(positions)
