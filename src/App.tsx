@@ -584,7 +584,7 @@ export default function App() {
                   </div>
                 )}
               </div>
-              <div style={{ display: 'flex' }}>
+              <div style={{ display: 'flex', gap: '4px', borderBottom: '1px solid var(--ontrack-border)' }}>
                 {(['flowchart', ...(myRole === 'leader' ? ['alltasks'] : []), 'mytasks', 'members', ...(myRole === 'leader' ? ['settings'] : [])] as RoomTab[]).map(t => (
                   <button key={t} onClick={() => setRoomTab(t)} style={{
                     background: 'none', border: 'none', padding: '10px 20px', fontSize: '13px',
@@ -1151,7 +1151,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               )}
             </button>
           </div>
-          <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginTop: '-2px', marginBottom: '14px' }}>At least 6 characters</p>
+          <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', marginTop: '4px', marginBottom: '14px' }}>At least 6 characters</p>
           {!isLogin && (
             <div>
               <label style={S.label}>Confirm Password</label>
@@ -1167,6 +1167,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
               </div>
             </div>
           )}
+          <div style={{ marginTop: '8px' }}>
           {showTermsModal && (
             <Modal title="Terms and Agreement" onClose={() => setShowTermsModal(false)}>
               <div style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)', lineHeight: 1.7, maxHeight: '60vh', overflowY: 'auto' }}>
@@ -1185,15 +1186,16 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
             </Modal>
           )}
           {!isLogin && (
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', cursor: 'pointer' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '14px', marginBottom: '14px', cursor: 'pointer' }}>
               <input type="checkbox" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} style={{ width: '16px', height: '16px', accentColor: 'var(--ontrack-primary)' }} />
               <span style={{ fontSize: '13px', color: 'var(--ontrack-text-secondary)' }}>I agree to the{' '}
                 <span onClick={() => setShowTermsModal(true)} style={{ color: 'var(--ontrack-primary)', cursor: 'pointer', fontWeight: 600 }}>Terms and Agreement</span>
               </span>
             </label>
           )}
+          </div>
           {isLogin && <div style={{ textAlign: 'right', marginTop: '-8px', marginBottom: '14px' }}><span style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)', cursor: 'pointer' }}>Forgot password?</span></div>}
-          <button onClick={handleSubmit} style={{ ...S.red, width: '100%', padding: '12px', fontSize: '14px' }}>{isLogin ? 'Log in' : 'Register'}</button>
+          <button onClick={handleSubmit} style={{ ...S.red, width: '100%', padding: '12px', fontSize: '14px', marginTop: '12px' }}>{isLogin ? 'Log in' : 'Register'}</button>
           {!isLogin && <p style={{ fontSize: '11px', color: 'var(--ontrack-text-muted)', textAlign: 'center', marginTop: '12px' }}></p>}
           <p style={{ textAlign: 'center', marginTop: '16px', fontSize: '13px', color: 'var(--ontrack-text-secondary)' }}>
             {isLogin ? "Don't have an account? " : 'Already have an account? '}
@@ -1272,7 +1274,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
           </button>
         </div>
         <label style={S.label}>Confirm New Password</label>
-        <div style={{ position: 'relative' }}>
+        <div style={{ position: 'relative', marginBottom: '14px' }}>
           <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirmNew ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
           <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {showConfirmNew ? (
@@ -1282,7 +1284,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
             )}
           </button>
         </div>
-        <button style={S.red} onClick={save}>Save Changes</button>
+          <button style={{ ...S.red, marginTop: '12px' }} onClick={save}>Save Changes</button>
       </div>
       <div style={{ display: 'flex', gap: '10px' }}>
         <button style={S.ghost} onClick={onSwitchAccount}>Switch Account</button>
@@ -1310,7 +1312,7 @@ function SettingsView({ room, myRole, onUpdate, onArchive, onDelete, onLeave }: 
         <label style={S.label}>Description</label>
         <textarea style={{ ...S.input, height: '80px', resize: 'none' }} value={desc} onChange={e => setDesc(e.target.value)} />
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button style={S.red} onClick={save}>Save Changes</button>
+        <button style={{ ...S.red, marginTop: '12px' }} onClick={save}>Save Changes</button>
           {saved && <span style={{ fontSize: '13px', color: 'var(--ontrack-success)' }}>✓ Saved</span>}
         </div>
       </div>
@@ -1336,7 +1338,7 @@ function computeFlowchartLayout(tasks: Task[], taskDeps: Record<string, string[]
   const vGap = 80
   const startX = 80
   const startY = 50
-  const componentGap = 120 // extra spacing between components
+  const componentGap = 200 // increased spacing between components
 
   if (tasks.length === 0) return {}
 
