@@ -569,6 +569,16 @@ export default function App() {
         })
         const taskDeps = Object.fromEntries(tasks.map(t => [t.id, taskDB.deps(t.id)]))
         const getUserName = (id: string) => userDB.find(id)?.name ?? id
+        const dueLabel = (deadline: string): string => {
+          const now = new Date()
+          now.setHours(0, 0, 0, 0)
+          const d = new Date(deadline)
+          d.setHours(0, 0, 0, 0)
+          const diffDays = Math.round((d.getTime() - now.getTime()) / 86400000)
+          if (diffDays > 0) return `Due in ${diffDays} day${diffDays > 1 ? 's' : ''}`
+          if (diffDays === 0) return 'Due today'
+          return `${Math.abs(diffDays)} day${Math.abs(diffDays) > 1 ? 's' : ''} overdue`
+        }
 
         return (
           <>
@@ -676,7 +686,7 @@ export default function App() {
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, marginBottom: '4px' }}>{task.title}</div>
                           <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>
-                            Due {task.deadline}
+                            {dueLabel(task.deadline)}
                             {task.assigneeIds.length > 0 && (
                               <span style={{ marginLeft: '10px' }}>· {task.assigneeIds.map(id => getUserName(id)).join(', ')}</span>
                             )}
@@ -706,7 +716,7 @@ export default function App() {
                         onMouseLeave={e => (e.currentTarget.style.borderColor = 'var(--ontrack-border)')}>
                         <div style={{ flex: 1 }}>
                           <div style={{ fontWeight: 600, marginBottom: '4px' }}>{task.title}</div>
-                          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>Due {task.deadline}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>{dueLabel(task.deadline)}</div>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                           <StatusBadge status={task.status} />
