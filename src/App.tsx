@@ -667,16 +667,6 @@ export default function App() {
                     </div>
                   </div>
 
-                  {/* Filter chips with counts */}
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                    {(['all','not-started','in-progress','submitted','done','revision','late'] as const).map(s => {
-                      const count = s === 'all' ? tasks.length : tasks.filter(t => t.status === s).length
-                      return (
-                        <FilterPill key={s} statusKey={s} active={statusFilter === s} label={s === 'all' ? `All (${count})` : `${STATUS[s as TaskStatus]?.label ?? s} (${count})`} onClick={() => setStatusFilter(s)} />
-                      )
-                    })}
-                  </div>
-
                   {allFilteredTasks.length === 0
                     ? <Empty text={tasks.length === 0 ? 'No tasks yet. Add the first task to get started.' : 'No tasks match this filter.'} />
                     : allFilteredTasks.map(task => (
