@@ -84,6 +84,7 @@ export default function App() {
   const [mJoinRoom, setMJoinRoom] = useState(false)
   const [mCreateTask, setMCreateTask] = useState(false)
   const [editingTask, setEditingTask] = useState<Task | null>(null)
+  const [reopeningTask, setReopeningTask] = useState<Task | null>(null)
   const [mTaskDetail, setMTaskDetail] = useState<Task | null>(null)
   const [mSubmitTask, setMSubmitTask] = useState<Task | null>(null)
   const [mDeleteRoom, setMDeleteRoom] = useState(false)
@@ -756,7 +757,7 @@ export default function App() {
                     <InfoBox label="Submission Link" value={<a href={mTaskDetail.submissionLink} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--ontrack-info)', fontSize: '13px', wordBreak: 'break-all' }}>{mTaskDetail.submissionLink}</a>} />
                   </div>
                 )}
-                {((myRole === 'leader' && mTaskDetail.status === 'submitted') || (mTaskDetail.assigneeIds.includes(currentUser.id) && mTaskDetail.status === 'not-started') || (mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late')) || (myRole === 'leader' && mTaskDetail.status !== 'submitted' && mTaskDetail.status !== 'done')) ? (
+                {((myRole === 'leader' && mTaskDetail.status === 'submitted') || (mTaskDetail.assigneeIds.includes(currentUser.id) && mTaskDetail.status === 'not-started') || (mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late')) || (myRole === 'leader' && mTaskDetail.status !== 'submitted')) ? (
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '8px' }}>
                     {myRole === 'leader' && mTaskDetail.status === 'submitted' && (
                       <>
@@ -770,8 +771,11 @@ export default function App() {
                     {mTaskDetail.assigneeIds.includes(currentUser.id) && (mTaskDetail.status === 'in-progress' || mTaskDetail.status === 'revision' || mTaskDetail.status === 'late') && (
                       <button style={{ ...S.red, flex: 1 }} onClick={() => { setMTaskDetail(null); setMSubmitTask(mTaskDetail) }}>Submit Task</button>
                     )}
-                    {myRole === 'leader' && mTaskDetail.status !== 'submitted' && mTaskDetail.status !== 'done' && (
+                    {myRole === 'leader' && mTaskDetail.status !== 'submitted' && (
                       <button style={{ ...S.ghost, fontSize: '12px', padding: '7px 12px' }} onClick={() => { setEditingTask(mTaskDetail); setMTaskDetail(null) }}>Edit Task</button>
+                    )}
+                    {myRole === 'leader' && mTaskDetail.status === 'done' && (
+                      <button style={{ ...S.red, fontSize: '12px', padding: '7px 12px' }} onClick={() => { setReopeningTask(mTaskDetail); setEditingTask(mTaskDetail); setMTaskDetail(null) }}>Reopen Task</button>
                     )}
                   </div>
                 ) : null}
@@ -786,10 +790,12 @@ export default function App() {
                 existingTasks={tasks}
                 taskDeps={taskDeps}
                 task={editingTask ?? undefined}
-                onClose={() => { setMCreateTask(false); setEditingTask(null) }}
+                onClose={() => { setMCreateTask(false); setEditingTask(null); setReopeningTask(null) }}
                 onSave={(data, deps) => {
                   if (editingTask) {
-                    updateTask(editingTask.id, data, deps)
+                    const finalData = reopeningTask ? { ...data, status: 'not-started' as TaskStatus } : data
+                    updateTask(editingTask.id, finalData, deps)
+                    setReopeningTask(null)
                   } else {
                     createTask(data, deps)
                   }
@@ -914,15 +920,20 @@ function Shell({ children, view, setView, currentRoom, currentUser, activeRooms,
                 <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--ontrack-border)', fontSize: '11px', fontWeight: 700, color: 'var(--ontrack-text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Notifications</div>
                 {notifications.length === 0
                   ? <div style={{ padding: '20px 16px', color: 'var(--ontrack-text-muted)', fontSize: '13px', textAlign: 'center' }}>All caught up!</div>
-                  : notifications.slice(0, 8).map(n => (
-                    <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: n.read ? 400 : 600, color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-text)', background: n.read ? 'transparent' : 'var(--ontrack-primary-tint)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
-                      <span style={{ color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-primary)', flexShrink: 0, marginTop: '1px', fontSize: '14px' }}>●</span>
-                      <div style={{ flex: 1 }}>
-                        <div>{n.text}</div>
-                        <div style={{ fontSize: '11px', color: 'var(--ontrack-text-secondary)', marginTop: '3px' }}>{relativeTime(n.createdAt)}</div>
+                  : notifications.slice(0, 8).map(n => {
+                    const room = roomDB.find(n.roomId)
+                    return (
+                      <div key={n.id} style={{ padding: '12px 16px', fontSize: '13px', fontWeight: n.read ? 400 : 600, color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-text)', background: n.read ? 'transparent' : 'var(--ontrack-primary-tint)', borderBottom: '1px solid var(--ontrack-border)', display: 'flex', gap: '10px' }}>
+                        <span style={{ color: n.read ? 'var(--ontrack-text-secondary)' : 'var(--ontrack-primary)', flexShrink: 0, marginTop: '1px', fontSize: '14px' }}>●</span>
+                        <div style={{ flex: 1 }}>
+                          <div>{n.text}</div>
+                          <div style={{ fontSize: '11px', color: 'var(--ontrack-text-secondary)', marginTop: '3px' }}>
+                            {room ? `In ${room.title}` : ''}{room ? ' · ' : ''}{relativeTime(n.createdAt)}
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 }
               </div>
             )}

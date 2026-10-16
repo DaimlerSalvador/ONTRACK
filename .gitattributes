@@ -4,6 +4,9 @@
 # ---------------------------------------------------------------------------
 # Images & Graphics
 # ---------------------------------------------------------------------------
+# OnTrack app assets (small, commit directly)
+!src/assets/logo.jpg
+!src/assets/registerbackground.jpg
 *.png                filter=lfs diff=lfs merge=lfs -text
 *.jpg                filter=lfs diff=lfs merge=lfs -text
 *.jpeg               filter=lfs diff=lfs merge=lfs -text

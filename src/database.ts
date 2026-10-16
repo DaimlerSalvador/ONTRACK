@@ -65,6 +65,7 @@ export interface Message {
 export interface Notification {
   id: string
   userId: string
+  roomId: string
   text: string
   read: boolean
   createdAt: string
@@ -202,10 +203,10 @@ export function initDB(): void {
 
   // -- notifications --
   const notifs: Notification[] = [
-    { id: 'n1', userId: 'u1', text: 'Your task "Frontend Coding" is due in 3 days.',              read: false, createdAt: new Date(Date.now() -  7200000).toISOString() },
-    { id: 'n2', userId: 'u1', text: 'Isabel submitted "Documentation" — pending your review.',    read: false, createdAt: new Date(Date.now() - 18000000).toISOString() },
-    { id: 'n3', userId: 'u1', text: 'Henry updated "UI/UX Design" status to In Progress.',        read: true,  createdAt: new Date(Date.now() - 86400000).toISOString() },
-    { id: 'n4', userId: 'u1', text: 'Leader approved "Architecture Review" in Systems Lab.',       read: true,  createdAt: new Date(Date.now() -172800000).toISOString() },
+    { id: 'n1', userId: 'u1', roomId: 'r1', text: 'Your task "Frontend Coding" is due in 3 days.', read: false, createdAt: new Date(Date.now() - 7200000).toISOString() },
+    { id: 'n2', userId: 'u1', roomId: 'r1', text: 'Isabel submitted "Documentation" — pending your review.', read: false, createdAt: new Date(Date.now() - 18000000).toISOString() },
+    { id: 'n3', userId: 'u1', roomId: 'r1', text: 'Henry updated "UI/UX Design" status to In Progress.', read: true, createdAt: new Date(Date.now() - 86400000).toISOString() },
+    { id: 'n4', userId: 'u1', roomId: 'r1', text: 'Leader approved "Architecture Review" in Systems Lab.', read: true, createdAt: new Date(Date.now() -172800000).toISOString() },
   ]
   save('notifications', notifs)
 
@@ -355,7 +356,7 @@ export const roomDB = {
     if (room.archived) return 'This room is archived and not accepting members.'
     if (memberDB.find(room.id, userId)) return 'You are already a member of this room.'
     memberDB.insert(room.id, userId, 'member')
-    notifDB.insert(room.leaderId, `${userDB.find(userId)?.name ?? 'Someone'} joined "${room.title}".`)
+    notifDB.insert(room.leaderId, `${userDB.find(userId)?.name ?? 'Someone'} joined "${room.title}".`, room.id)
     return room
   },
 }
@@ -428,7 +429,7 @@ export const taskDB = {
       save('task_deps', depRows)
     }
     if (data.assigneeIds.length) {
-      data.assigneeIds.forEach(aid => notifDB.insert(aid, `You've been assigned to "${task.title}". Due: ${task.deadline}.`))
+      data.assigneeIds.forEach(aid => notifDB.insert(aid, `You've been assigned to "${task.title}". Due: ${task.deadline}.`, data.roomId))
     }
     return task
   },
@@ -466,7 +467,7 @@ export const taskDB = {
       if ((task.status === 'not-started' || task.status === 'in-progress' || task.status === 'revision') && new Date(task.deadline).getTime() < now) {
         const t = taskDB.update(task.id, { status: 'late' })
         if (t) updated.push(t)
-        task.assigneeIds.forEach(aid => notifDB.insert(aid, `Task "${task.title}" is late. Deadline was ${task.deadline}.`))
+        task.assigneeIds.forEach(aid => notifDB.insert(aid, `Task "${task.title}" is late. Deadline was ${task.deadline}.`, task.roomId))
       }
     })
     return updated
@@ -475,21 +476,21 @@ export const taskDB = {
   /** Submit task — updates status and notifies leader */
   submit(id: string, link: string, leaderId: string): Task | null {
     const task = taskDB.update(id, { status: 'submitted', submissionLink: link })
-    if (task) notifDB.insert(leaderId, `"${task.title}" was submitted and is ready for review.`)
+    if (task) notifDB.insert(leaderId, `"${task.title}" was submitted and is ready for review.`, task.roomId)
     return task
   },
 
   /** Leader approves task */
   approve(id: string, assigneeIds: string[]): Task | null {
     const task = taskDB.update(id, { status: 'done' })
-    if (task) assigneeIds.forEach(aid => notifDB.insert(aid, `Your task "${task.title}" was approved! ✓`))
+    if (task) assigneeIds.forEach(aid => notifDB.insert(aid, `Your task "${task.title}" was approved! ✓`, task.roomId))
     return task
   },
 
   /** Leader requests revision */
   requestRevision(id: string, assigneeIds: string[]): Task | null {
     const task = taskDB.update(id, { status: 'revision' })
-    if (task) assigneeIds.forEach(aid => notifDB.insert(aid, `Your task "${task.title}" needs revision. Check the feedback.`))
+    if (task) assigneeIds.forEach(aid => notifDB.insert(aid, `Your task "${task.title}" needs revision. Check the feedback.`, task.roomId))
     return task
   },
 }
@@ -534,8 +535,8 @@ export const notifDB = {
   },
 
   /** INSERT INTO notifications VALUES (?) */
-  insert(userId: string, text: string): Notification {
-    const row: Notification = { id: uid(), userId, text, read: false, createdAt: now() }
+  insert(userId: string, text: string, roomId: string): Notification {
+    const row: Notification = { id: uid(), userId, roomId, text, read: false, createdAt: now() }
     const rows = select<Notification>('notifications')
     rows.push(row)
     save('notifications', rows)
