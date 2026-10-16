@@ -498,6 +498,8 @@ export default function App() {
 
   const activeRooms   = rooms.filter(r => !r.archived)
   const archivedRooms = rooms.filter(r => r.archived)
+  const doneCountAll  = tasks.filter(t => t.status === 'done').length
+  const donePctAll    = tasks.length ? Math.round((doneCountAll / tasks.length) * 100) : 0
 
   return (
     <Shell
@@ -560,7 +562,11 @@ export default function App() {
       {view === 'room' && currentRoom && currentUser && (() => {
         const myTasks = tasks.filter(t => t.assigneeIds.includes(currentUser.id))
         const filteredTasks = myTasks.filter(t => statusFilter === 'all' || t.status === statusFilter)
-        const allFilteredTasks = tasks.filter(t => statusFilter === 'all' || t.status === statusFilter)
+        const allFilteredTasks = tasks.filter(t => statusFilter === 'all' || t.status === statusFilter).sort((a, b) => {
+          if (a.status === 'submitted' && b.status !== 'submitted') return -1
+          if (a.status !== 'submitted' && b.status === 'submitted') return 1
+          return 0
+        })
         const taskDeps = Object.fromEntries(tasks.map(t => [t.id, taskDB.deps(t.id)]))
         const getUserName = (id: string) => userDB.find(id)?.name ?? id
 
@@ -625,11 +631,52 @@ export default function App() {
               {/* ── All Tasks (leader monitor) ── */}
               {roomTab === 'alltasks' && myRole === 'leader' && (
                 <div style={{ padding: '24px 32px' }}>
-                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
-                    {(['all','not-started','in-progress','submitted','done','revision','late'] as const).map(s => (
-                      <FilterPill key={s} statusKey={s} active={statusFilter === s} label={s === 'all' ? 'All' : STATUS[s as TaskStatus]?.label ?? s} onClick={() => setStatusFilter(s)} />
-                    ))}
+                  {/* Summary strip */}
+                  <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '10px', padding: '18px 22px', marginBottom: '22px', display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: '210px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', fontWeight: 600, marginBottom: '6px', color: 'var(--ontrack-text-muted)' }}>
+                        <span>Progress</span>
+                        <span>{doneCountAll} of {tasks.length} done ({donePctAll}%)</span>
+                      </div>
+                      <div style={{ height: '8px', background: 'var(--ontrack-border)', borderRadius: '4px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: donePctAll + '%', background: 'var(--ontrack-success)' }} />
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', minWidth: '240px' }}>
+                      {(['not-started','in-progress','submitted','done','revision','late'] as const).map(s => {
+                        const c = STATUS[s]
+                        const count = tasks.filter(t => t.status === s).length
+                        return (
+                          <button key={s} onClick={() => setStatusFilter(s)} style={{
+                            padding: '6px 12px', borderRadius: '20px', fontSize: '11.5px', fontWeight: 600,
+                            border: '1px solid ' + c.nodeBorder + '40',
+                            background: statusFilter === s ? c.pillBg : 'var(--ontrack-surface-alt)',
+                            color: statusFilter === s ? c.pillText : 'var(--ontrack-text-secondary)', cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: '6px',
+                          }}>
+                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: c.dot, flexShrink: 0 }} />
+                            {c.label} <span style={{ fontWeight: 500, opacity: 0.85 }}>({count})</span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                    <div style={{ width: '72px', height: '72px', borderRadius: '50%',
+                      background: 'conic-gradient(var(--ontrack-success) 0deg ' + (donePctAll * 3.6) + 'deg, var(--ontrack-border) ' + (donePctAll * 3.6) + 'deg 360deg)',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, color: 'var(--ontrack-text)' }}>
+                      {donePctAll}%
+                    </div>
                   </div>
+
+                  {/* Filter chips with counts */}
+                  <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                    {(['all','not-started','in-progress','submitted','done','revision','late'] as const).map(s => {
+                      const count = s === 'all' ? tasks.length : tasks.filter(t => t.status === s).length
+                      return (
+                        <FilterPill key={s} statusKey={s} active={statusFilter === s} label={s === 'all' ? `All (${count})` : `${STATUS[s as TaskStatus]?.label ?? s} (${count})`} onClick={() => setStatusFilter(s)} />
+                      )
+                    })}
+                  </div>
+
                   {allFilteredTasks.length === 0
                     ? <Empty text={tasks.length === 0 ? 'No tasks yet. Add the first task to get started.' : 'No tasks match this filter.'} />
                     : allFilteredTasks.map(task => (
@@ -649,8 +696,7 @@ export default function App() {
                           <StatusBadge status={task.status} />
                         </div>
                       </div>
-                    ))
-                  }
+                    ))}
                 </div>
               )}
 
