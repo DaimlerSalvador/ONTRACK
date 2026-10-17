@@ -874,7 +874,7 @@ export default function App() {
                 <p style={{ color: 'var(--ontrack-text-secondary)', fontSize: '14px', marginBottom: '20px', lineHeight: 1.6 }}>
                   Are you sure you want to permanently delete <strong style={{ color: 'var(--ontrack-text)' }}>{currentRoom.title}</strong>? This will remove all tasks, members, and messages. This action cannot be undone.
                 </p>
-                <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '24px' }}>
                   <button style={{ ...S.danger, flex: 1 }} onClick={() => deleteRoom(currentRoom.id)}>Delete Room</button>
                   <button style={{ ...S.ghost, flex: 1 }} onClick={() => setMDeleteRoom(false)}>Cancel</button>
                 </div>
