@@ -1309,7 +1309,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, onChan
           <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>{user.email}</div>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', minWidth: '300px' }}>
           <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '18px 24px', maxWidth: '440px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
