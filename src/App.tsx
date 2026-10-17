@@ -1374,7 +1374,7 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, onChan
           <button style={{ ...S.red, marginTop: '12px' }} onClick={save}>Save Changes</button>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: '10px' }}>
+      <div style={{ display: 'flex', gap: '10px', marginTop: '48px' }}>
         <button style={S.ghost} onClick={onSwitchAccount}>Switch Account</button>
         <button style={S.danger} onClick={onLogout}>Logout</button>
       </div>
