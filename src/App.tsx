@@ -475,6 +475,15 @@ export default function App() {
     return null
   }
 
+  function changeName(firstName: string, lastName: string): string | null {
+    if (!currentUser) return 'Not logged in.'
+    if (!firstName.trim()) return 'First name is required.'
+    if (!lastName.trim()) return 'Last name is required.'
+    const updated = userDB.update(currentUser.id, { name: `${firstName.trim()} ${lastName.trim()}` })
+    if (updated) writeRow('users', updated)
+    return null
+  }
+
   // ── Notifications ──
 
   function openNotifs() {
@@ -532,7 +541,7 @@ export default function App() {
 
       {/* ━━━ PROFILE ━━━ */}
       {view === 'profile' && currentUser && (
-        <ProfileView user={currentUser} onLogout={handleLogout} onSwitchAccount={handleSwitchAccount} onChangePassword={changePassword} theme={theme} onToggleTheme={toggleTheme} />
+        <ProfileView user={currentUser} onLogout={handleLogout} onSwitchAccount={handleSwitchAccount} onChangePassword={changePassword} onChangeName={changeName} theme={theme} onToggleTheme={toggleTheme} />
       )}
 
       {/* ━━━ ARCHIVED ━━━ */}
@@ -1267,7 +1276,7 @@ function AuthPage({ mode, error, onSubmit, onSwitch, onBack }: { mode: 'login' |
 
 // ─── Profile view ──────────────────────────────────────────────────────────────
 
-function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme, onToggleTheme }: { user: User; onLogout: () => void; onSwitchAccount: () => void; onChangePassword: (c: string, n: string, co: string) => string | null; theme: 'light' | 'dark'; onToggleTheme: () => void }) {
+function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, onChangeName, theme, onToggleTheme }: { user: User; onLogout: () => void; onSwitchAccount: () => void; onChangePassword: (c: string, n: string, co: string) => string | null; onChangeName: (f: string, l: string) => string | null; theme: 'light' | 'dark'; onToggleTheme: () => void }) {
   const [current, setCurrent] = useState('')
   const [next, setNext] = useState('')
   const [confirm, setConfirm] = useState('')
@@ -1275,6 +1284,15 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
   const [showCurrent, setShowCurrent] = useState(false)
   const [showNext, setShowNext] = useState(false)
   const [showConfirmNew, setShowConfirmNew] = useState(false)
+  const [firstName, setFirstName] = useState(user.name.split(' ')[0] ?? '')
+  const [lastName, setLastName] = useState(user.name.split(' ').slice(1).join(' ') ?? '')
+  const [nameMsg, setNameMsg] = useState<{ text: string; ok: boolean } | null>(null)
+
+  function saveName() {
+    const err = onChangeName(firstName, lastName)
+    if (err) setNameMsg({ text: err, ok: false })
+    else { setNameMsg({ text: 'Name updated successfully.', ok: true }) }
+  }
 
   function save() {
     const err = onChangePassword(current, next, confirm)
@@ -1304,6 +1322,15 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, theme,
           )}
           {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
         </button>
+      </div>
+      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
+        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Name</h3>
+        {nameMsg && <div style={{ background: nameMsg.ok ? '#163326' : '#2a1515', border: `1px solid ${nameMsg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: nameMsg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{nameMsg.text}</div>}
+        <label style={S.label}>First Name</label>
+        <input style={S.input} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" />
+        <label style={S.label}>Last Name</label>
+        <input style={S.input} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" />
+        <button style={{ ...S.red, width: '100%', marginTop: '12px' }} onClick={saveName}>Save Changes</button>
       </div>
       <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
         <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Password</h3>
