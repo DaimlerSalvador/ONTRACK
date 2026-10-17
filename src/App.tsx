@@ -1309,66 +1309,72 @@ function ProfileView({ user, onLogout, onSwitchAccount, onChangePassword, onChan
           <div style={{ fontSize: '13px', color: 'var(--ontrack-text-muted)' }}>{user.email}</div>
         </div>
       </div>
-      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '18px 24px', maxWidth: '440px', marginBottom: '20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px', color: 'var(--ontrack-text)' }}>Appearance</div>
-          <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</div>
+      <div style={{ display: 'flex', gap: '24px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: '300px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '18px 24px', maxWidth: '440px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: 700, marginBottom: '4px', color: 'var(--ontrack-text)' }}>Appearance</div>
+              <div style={{ fontSize: '12px', color: 'var(--ontrack-text-muted)' }}>{theme === 'dark' ? 'Dark mode' : 'Light mode'}</div>
+            </div>
+            <button onClick={onToggleTheme} style={{ background: 'var(--ontrack-border)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '8px 16px', color: 'var(--ontrack-text)', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {theme === 'dark' ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
+              )}
+              {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+            </button>
+          </div>
+          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Name</h3>
+            {nameMsg && <div style={{ background: nameMsg.ok ? '#163326' : '#2a1515', border: `1px solid ${nameMsg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: nameMsg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{nameMsg.text}</div>}
+            <label style={S.label}>First Name</label>
+            <input style={S.input} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" />
+            <label style={S.label}>Last Name</label>
+            <input style={S.input} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" />
+            <button style={{ ...S.red, width: '100%', marginTop: '12px' }} onClick={saveName}>Save Changes</button>
+          </div>
         </div>
-        <button onClick={onToggleTheme} style={{ background: 'var(--ontrack-border)', border: '1px solid var(--ontrack-border)', borderRadius: '6px', padding: '8px 16px', color: 'var(--ontrack-text)', cursor: 'pointer', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '8px' }}>
-          {theme === 'dark' ? (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-          ) : (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"></path></svg>
-          )}
-          {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
-        </button>
-      </div>
-      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Name</h3>
-        {nameMsg && <div style={{ background: nameMsg.ok ? '#163326' : '#2a1515', border: `1px solid ${nameMsg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: nameMsg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{nameMsg.text}</div>}
-        <label style={S.label}>First Name</label>
-        <input style={S.input} value={firstName} onChange={e => setFirstName(e.target.value)} placeholder="First name" />
-        <label style={S.label}>Last Name</label>
-        <input style={S.input} value={lastName} onChange={e => setLastName(e.target.value)} placeholder="Last name" />
-        <button style={{ ...S.red, width: '100%', marginTop: '12px' }} onClick={saveName}>Save Changes</button>
-      </div>
-      <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', marginBottom: '20px' }}>
-        <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Password</h3>
-        {msg && <div style={{ background: msg.ok ? '#163326' : '#2a1515', border: `1px solid ${msg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: msg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{msg.text}</div>}
-        <label style={S.label}>Current Password</label>
-        <div style={{ position: 'relative', marginBottom: '14px' }}>
-          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showCurrent ? "text" : "password"} value={current} onChange={e => setCurrent(e.target.value)} placeholder="••••••••" />
-          <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {showCurrent ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
-            )}
-          </button>
+        <div style={{ flex: '0 0 440px', minWidth: '440px' }}>
+          <div style={{ background: 'var(--ontrack-surface)', border: '1px solid var(--ontrack-border)', borderRadius: '8px', padding: '24px', maxWidth: '440px', height: 'fit-content' }}>
+            <h3 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '18px', color: 'var(--ontrack-text)' }}>Change Password</h3>
+            {msg && <div style={{ background: msg.ok ? '#163326' : '#2a1515', border: `1px solid ${msg.ok ? '#22c55e30' : 'var(--ontrack-primary)30'}`, borderRadius: '5px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: msg.ok ? 'var(--ontrack-success)' : 'var(--ontrack-primary)' }}>{msg.text}</div>}
+            <label style={S.label}>Current Password</label>
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showCurrent ? "text" : "password"} value={current} onChange={e => setCurrent(e.target.value)} placeholder="••••••••" />
+              <button type="button" onClick={() => setShowCurrent(!showCurrent)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showCurrent ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+                )}
+              </button>
+            </div>
+            <label style={S.label}>New Password</label>
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showNext ? "text" : "password"} value={next} onChange={e => setNext(e.target.value)} placeholder="Min. 6 characters" />
+              <button type="button" onClick={() => setShowNext(!showNext)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showNext ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+                )}
+              </button>
+            </div>
+            <label style={S.label}>Confirm New Password</label>
+            <div style={{ position: 'relative', marginBottom: '14px' }}>
+              <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirmNew ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
+              <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {showConfirmNew ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
+                )}
+              </button>
+            </div>
+            <button style={{ ...S.red, marginTop: '12px' }} onClick={save}>Save Changes</button>
+          </div>
         </div>
-        <label style={S.label}>New Password</label>
-        <div style={{ position: 'relative', marginBottom: '14px' }}>
-          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showNext ? "text" : "password"} value={next} onChange={e => setNext(e.target.value)} placeholder="Min. 6 characters" />
-          <button type="button" onClick={() => setShowNext(!showNext)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {showNext ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
-            )}
-          </button>
-        </div>
-        <label style={S.label}>Confirm New Password</label>
-        <div style={{ position: 'relative', marginBottom: '14px' }}>
-          <input style={{ ...S.input, paddingRight: '36px', marginBottom: 0 }} type={showConfirmNew ? "text" : "password"} value={confirm} onChange={e => setConfirm(e.target.value)} placeholder="••••••••" />
-          <button type="button" onClick={() => setShowConfirmNew(!showConfirmNew)} style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', color: 'var(--ontrack-text-muted)', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {showConfirmNew ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M1 1l22 22M16.656 11.205A3.001 3.001 0 0012.012 10 3 3 0 006.343 14m3.85 3.85A7.15 7.15 0 0112 19a9.89 9.89 0 01-4.45-2.55M11 6.055a10.4 10.4 0 014.545 3.54M4.752 3.752l16.496 16.496"></path></svg>
-            )}
-          </button>
-        </div>
-          <button style={{ ...S.red, marginTop: '12px' }} onClick={save}>Save Changes</button>
       </div>
       <div style={{ display: 'flex', gap: '10px' }}>
         <button style={S.ghost} onClick={onSwitchAccount}>Switch Account</button>
